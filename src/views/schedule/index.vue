@@ -234,7 +234,7 @@ onUnmounted(() => {
             v-for="(day, index) in WEEK_DAYS"
             :key="index"
             class="week-day"
-            :style="{ width: `${cellWidth}px` }"
+            style="width: 14%"
           >
             {{ day }}
           </div>
@@ -246,7 +246,7 @@ onUnmounted(() => {
               v-for="(day, dayIndex) in calendarDays"
               :key="dayIndex"
               class="calendar-cell"
-              :style="{ width: `${cellWidth}px`, height: `${cellHeight}px` }"
+              :style="{ height: `${cellHeight}px` }"
               :class="{
                 'other-month': !day.isCurrentMonth,
                 'today': day.isToday
@@ -469,13 +469,11 @@ onUnmounted(() => {
 .calendar-grid {
   display: flex;
   flex-wrap: wrap;
-  height: 100%;
 }
 
 .calendar-cell {
-  border-right: 1px solid #e8e8e8;
-  border-bottom: 1px solid #e8e8e8;
-  padding: 8px;
+  width: 14%;
+  border: 1px solid #e8e8e8;
   position: relative;
   flex-shrink: 0;
   background-color: white;
@@ -508,11 +506,11 @@ onUnmounted(() => {
 }
 
 .day-number {
-  font-size: 14px;
+  font-size: 10px;
   color: #1a1a1a;
   font-weight: 500;
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -531,6 +529,7 @@ onUnmounted(() => {
   gap: 4px;
   flex: 1;
   overflow: hidden;
+  width: 100%;
 }
 
 .task-item {
@@ -540,7 +539,6 @@ onUnmounted(() => {
   padding: 4px 6px;
   border-radius: 4px;
   font-size: 11px;
-  color: white;
   cursor: pointer;
   transition: opacity 0.2s;
   flex-shrink: 0;
