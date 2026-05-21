@@ -1,214 +1,282 @@
-<script setup lang="ts">import { ref, computed, onMounted } from 'vue';
-import TaskBar from '@/components/TaskBar.vue';
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { db, type Task } from '@/db';
-import { formatDate, getDaysInMonth, getFirstDayOfMonth, getLastDayOfMonth, addMonths, getMonthName, generateDaysInMonth } from '@/utils/date';
-const DAY_WIDTH = 40;
-const ROW_HEIGHT = 40;
+import { formatDate, getDaysInMonth, getFirstDayOfMonth, getLastDayOfMonth, addMonths, parseDate, isDateBetween } from '@/utils/date';
+import { getTaskColor } from '@/utils/color';
+
+const WEEK_DAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
 const currentDate = ref(new Date());
 const tasks = ref<Task[]>([]);
 const showModal = ref(false);
 const editingTask = ref<Task | null>(null);
+const calendarWrapper = ref<HTMLElement | null>(null);
+const cellWidth = ref(100);
+const cellHeight = ref(120);
+
 const newTask = ref({
- title: '',
- content: '',
- startDate: '',
- endDate: ''
+  title: '',
+  content: '',
+  startDate: '',
+  endDate: ''
 });
+
 const year = computed(() => currentDate.value.getFullYear());
 const month = computed(() => currentDate.value.getMonth());
-const monthName = computed(() => getMonthName(year.value, month.value));
+const monthName = computed(() => `${year.value}年${month.value + 1}月`);
 const daysInMonth = computed(() => getDaysInMonth(year.value, month.value));
-const days = computed(() => generateDaysInMonth(year.value, month.value));
-const containerWidth = computed(() => daysInMonth.value * DAY_WIDTH);
-const firstDay = computed(() => getFirstDayOfMonth(year.value, month.value));
-const lastDay = computed(() => getLastDayOfMonth(year.value, month.value));
-const filteredTasks = computed(() => {
- return tasks.value.filter(task => {
- const taskStart = new Date(task.startDate);
- const taskEnd = new Date(task.endDate);
- return taskEnd >= firstDay.value && taskStart <= lastDay.value;
- });
+const firstDayOfMonth = computed(() => getFirstDayOfMonth(year.value, month.value));
+const lastDayOfMonth = computed(() => getLastDayOfMonth(year.value, month.value));
+const firstDayOffset = computed(() => firstDayOfMonth.value.getDay());
+
+const calendarDays = computed(() => {
+  const days: {
+    date: string;
+    isCurrentMonth: boolean;
+    isToday: boolean;
+    dayOfMonth: number;
+    tasks: Task[];
+  }[] = [];
+
+  // 上一个月的日期
+  const prevMonthLastDay = new Date(year.value, month.value, 0).getDate();
+  for (let i = firstDayOffset.value - 1; i >= 0; i--) {
+    const date = new Date(year.value, month.value - 1, prevMonthLastDay - i);
+    const dateStr = formatDate(date);
+    days.push({
+      date: dateStr,
+      isCurrentMonth: false,
+      isToday: isSameDay(date, new Date()),
+      dayOfMonth: date.getDate(),
+      tasks: getTasksForDate(dateStr)
+    });
+  }
+
+  // 当前月的日期
+  for (let i = 1; i <= daysInMonth.value; i++) {
+    const date = new Date(year.value, month.value, i);
+    const dateStr = formatDate(date);
+    days.push({
+      date: dateStr,
+      isCurrentMonth: true,
+      isToday: isSameDay(date, new Date()),
+      dayOfMonth: i,
+      tasks: getTasksForDate(dateStr)
+    });
+  }
+
+  // 下一个月的日期
+  const remainingDays = 42 - days.length;
+  for (let i = 1; i <= remainingDays; i++) {
+    const date = new Date(year.value, month.value + 1, i);
+    const dateStr = formatDate(date);
+    days.push({
+      date: dateStr,
+      isCurrentMonth: false,
+      isToday: isSameDay(date, new Date()),
+      dayOfMonth: i,
+      tasks: getTasksForDate(dateStr)
+    });
+  }
+
+  return days;
 });
-interface TrackedTask extends Task {
- trackIndex: number;
- startOffset: number;
+
+function getTasksForDate(dateStr: string): Task[] {
+  return tasks.value.filter(task => 
+    isDateBetween(parseDate(dateStr), parseDate(task.startDate), parseDate(task.endDate))
+  );
 }
-const trackedTasks = computed((): TrackedTask[] => {
- const sorted = [...filteredTasks.value].sort((a, b) => {
- const dateCompare = a.startDate.localeCompare(b.startDate);
- if (dateCompare !== 0)
- return dateCompare;
- return a.id.localeCompare(b.id);
- });
- const tracks: Date[] = [];
- const result: TrackedTask[] = [];
- for (const task of sorted) {
- const taskStart = new Date(task.startDate);
- let assigned = false;
- for (let i = 0; i < tracks.length; i++) {
- if (tracks[i] < taskStart) {
- tracks[i] = new Date(task.endDate);
- result.push({
- ...task,
- trackIndex: i,
- startOffset: getDayOffset(task.startDate)
- });
- assigned = true;
- break;
- }
- }
- if (!assigned) {
- tracks.push(new Date(task.endDate));
- result.push({
- ...task,
- trackIndex: tracks.length - 1,
- startOffset: getDayOffset(task.startDate)
- });
- }
- }
- return result;
-});
-const containerHeight = computed(() => {
- const maxTrack = trackedTasks.value.reduce((max, t) => Math.max(max, t.trackIndex), -1);
- return (maxTrack + 1) * ROW_HEIGHT;
-});
-function getDayOffset(dateStr: string): number {
- const date = new Date(dateStr);
- const first = firstDay.value;
- return Math.floor((date.getTime() - first.getTime()) / (1000 * 60 * 60 * 24));
+
+function isSameDay(date1: Date, date2: Date): boolean {
+  return formatDate(date1) === formatDate(date2);
 }
+
 function prevMonth() {
- currentDate.value = addMonths(currentDate.value, -1);
+  currentDate.value = addMonths(currentDate.value, -1);
 }
+
 function nextMonth() {
- currentDate.value = addMonths(currentDate.value, 1);
+  currentDate.value = addMonths(currentDate.value, 1);
 }
+
 function goToToday() {
- currentDate.value = new Date();
+  currentDate.value = new Date();
 }
+
 async function loadTasks() {
- tasks.value = await db.tasks.toArray();
+  tasks.value = await db.tasks.toArray();
 }
+
 async function toggleComplete(id: string) {
- const task = tasks.value.find(t => t.id === id);
- if (task) {
- task.completed = !task.completed;
- await db.tasks.put(task);
- }
+  const task = tasks.value.find(t => t.id === id);
+  if (task) {
+    task.completed = !task.completed;
+    await db.tasks.put(task);
+  }
 }
+
 function openEditModal(id: string) {
- const task = tasks.value.find(t => t.id === id);
- if (!task) return;
- editingTask.value = task;
- newTask.value = {
- title: task.title,
- content: task.content,
- startDate: task.startDate,
- endDate: task.endDate
- };
- showModal.value = true;
+  const task = tasks.value.find(t => t.id === id);
+  if (!task) return;
+  editingTask.value = task;
+  newTask.value = {
+    title: task.title,
+    content: task.content,
+    startDate: task.startDate,
+    endDate: task.endDate
+  };
+  showModal.value = true;
 }
-function openCreateModal() {
- const today = formatDate(new Date());
- editingTask.value = null;
- newTask.value = {
- title: '',
- content: '',
- startDate: today,
- endDate: today
- };
- showModal.value = true;
+
+function openCreateModal(dateStr?: string) {
+  const today = dateStr || formatDate(new Date());
+  editingTask.value = null;
+  newTask.value = {
+    title: '',
+    content: '',
+    startDate: today,
+    endDate: today
+  };
+  showModal.value = true;
 }
+
 async function saveTask() {
- if (!newTask.value.title.trim()) {
- alert('请输入任务标题');
- return;
- }
- if (newTask.value.startDate > newTask.value.endDate) {
- alert('结束日期不能早于开始日期');
- return;
- }
- const task: Task = {
- id: editingTask.value?.id || Date.now().toString(),
- title: newTask.value.title.trim(),
- content: newTask.value.content,
- startDate: newTask.value.startDate,
- endDate: newTask.value.endDate,
- completed: editingTask.value?.completed || false
- };
- await db.tasks.put(task);
- await loadTasks();
- showModal.value = false;
+  if (!newTask.value.title.trim()) {
+    alert('请输入任务标题');
+    return;
+  }
+  if (newTask.value.startDate > newTask.value.endDate) {
+    alert('结束日期不能早于开始日期');
+    return;
+  }
+  const task: Task = {
+    id: editingTask.value?.id || Date.now().toString(),
+    title: newTask.value.title.trim(),
+    content: newTask.value.content,
+    startDate: newTask.value.startDate,
+    endDate: newTask.value.endDate,
+    completed: editingTask.value?.completed || false
+  };
+  await db.tasks.put(task);
+  await loadTasks();
+  showModal.value = false;
 }
+
 async function deleteTask() {
- if (!editingTask.value)
- return;
- await db.tasks.delete(editingTask.value.id);
- await loadTasks();
- showModal.value = false;
+  if (!editingTask.value) return;
+  await db.tasks.delete(editingTask.value.id);
+  await loadTasks();
+  showModal.value = false;
 }
+
 function closeModal() {
- showModal.value = false;
- editingTask.value = null;
+  showModal.value = false;
+  editingTask.value = null;
 }
-onMounted(loadTasks);
+
+function calculateSize() {
+  nextTick(() => {
+    if (calendarWrapper.value) {
+      const wrapperRect = calendarWrapper.value.getBoundingClientRect();
+      // 减去padding和边框
+      const availableWidth = wrapperRect.width - 48;
+      const availableHeight = wrapperRect.height - 44 - 16; // 减去header高度和间距
+      
+      cellWidth.value = Math.max(80, Math.floor(availableWidth / 7));
+      cellHeight.value = Math.max(80, Math.floor(availableHeight / 6));
+    }
+  });
+}
+
+let resizeTimer: number | null = null;
+function handleResize() {
+  if (resizeTimer) {
+    clearTimeout(resizeTimer);
+  }
+  resizeTimer = window.setTimeout(() => {
+    calculateSize();
+  }, 100);
+}
+
+onMounted(() => {
+  loadTasks();
+  calculateSize();
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
 
 <template>
   <div class="schedule-container">
-    <div class="page-header">
-      <h1>排期表</h1>
-      <button class="create-btn" @click="openCreateModal">新建任务</button>
-    </div>
-
-    <div class="calendar-header">
-      <button class="nav-btn" @click="prevMonth">←</button>
-      <button class="today-btn" @click="goToToday">今天</button>
-      <span class="month-title">{{ monthName }}</span>
-      <button class="nav-btn" @click="nextMonth">→</button>
-    </div>
-
-    <div class="calendar-container">
-      <div class="days-header">
-        <div
-          v-for="(day, index) in days"
-          :key="index"
-          class="day-cell"
-        >
-          {{ new Date(day).getDate() }}
-        </div>
+    <div class="header">
+      <div class="header-left">
+        <span class="calendar-icon">📅</span>
+        <h1>{{ monthName }}</h1>
       </div>
-      
-      <div
-        class="tasks-container"
-        :style="{
-          width: `${containerWidth}px`,
-          height: `${containerHeight}px`
-        }"
-      >
-        <div class="track-lines">
+      <div class="header-right">
+        <button class="icon-btn" @click="openCreateModal()">+</button>
+        <button class="text-btn">月 ▼</button>
+        <button class="icon-btn" @click="prevMonth">&lt;</button>
+        <button class="today-btn" @click="goToToday">今天</button>
+        <button class="icon-btn" @click="nextMonth">&gt;</button>
+        <button class="icon-btn">…</button>
+      </div>
+    </div>
+
+    <div class="calendar-wrapper" ref="calendarWrapper">
+      <div class="calendar-container">
+        <div class="week-header">
           <div
-            v-for="i in Math.max(1, containerHeight / ROW_HEIGHT)"
-            :key="i"
-            class="track-line"
-            :style="{ top: `${i * ROW_HEIGHT - 1}px` }"
-          ></div>
+            v-for="(day, index) in WEEK_DAYS"
+            :key="index"
+            class="week-day"
+            :style="{ width: `${cellWidth}px` }"
+          >
+            {{ day }}
+          </div>
         </div>
-        
-        <TaskBar
-          v-for="task in trackedTasks"
-          :key="task.id"
-          :task="task"
-          :day-width="DAY_WIDTH"
-          :start-offset="task.startOffset"
-          :row-height="ROW_HEIGHT"
-          :track-index="task.trackIndex"
-          @toggle-complete="toggleComplete"
-          @edit="openEditModal"
-        />
-        
-        <div v-if="trackedTasks.length === 0" class="empty-state">
-          <p>本月暂无任务，点击上方按钮添加</p>
+
+        <div class="calendar-body">
+          <div class="calendar-grid">
+            <div
+              v-for="(day, dayIndex) in calendarDays"
+              :key="dayIndex"
+              class="calendar-cell"
+              :style="{ width: `${cellWidth}px`, height: `${cellHeight}px` }"
+              :class="{
+                'other-month': !day.isCurrentMonth,
+                'today': day.isToday
+              }"
+              @click="openCreateModal(day.date)"
+            >
+              <span class="day-number" :class="{ 'today-number': day.isToday }">
+                {{ day.dayOfMonth }}
+              </span>
+              
+              <div class="tasks-list">
+                <div
+                  v-for="task in day.tasks.slice(0, 3)"
+                  :key="task.id"
+                  class="task-item"
+                  :style="{ backgroundColor: getTaskColor(task.id, task.completed) }"
+                  :class="{ 'task-completed': task.completed }"
+                  @click.stop="openEditModal(task.id)"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="task.completed"
+                    @click.stop="toggleComplete(task.id)"
+                    class="task-checkbox"
+                  />
+                  <span class="task-title">{{ task.title }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -219,7 +287,7 @@ onMounted(loadTasks);
           <h2>{{ editingTask ? '编辑任务' : '新建任务' }}</h2>
           <button class="close-btn" @click="closeModal">×</button>
         </div>
-        
+
         <div class="modal-body">
           <div class="form-group">
             <label>任务标题 *</label>
@@ -229,7 +297,7 @@ onMounted(loadTasks);
               placeholder="请输入任务标题"
             />
           </div>
-          
+
           <div class="form-group">
             <label>详细内容</label>
             <textarea
@@ -237,7 +305,7 @@ onMounted(loadTasks);
               placeholder="请输入详细内容（可选）"
             ></textarea>
           </div>
-          
+
           <div class="form-row">
             <div class="form-group">
               <label>开始日期 *</label>
@@ -255,7 +323,7 @@ onMounted(loadTasks);
             </div>
           </div>
         </div>
-        
+
         <div class="modal-footer">
           <button v-if="editingTask" class="delete-btn" @click="deleteTask">删除</button>
           <button class="cancel-btn" @click="closeModal">取消</button>
@@ -269,134 +337,261 @@ onMounted(loadTasks);
 <style lang="scss" scoped>
 .schedule-container {
   padding: 24px;
-  min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7fa;
+  box-sizing: border-box;
 }
 
-.page-header {
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e8e8e8;
+  flex-shrink: 0;
 }
 
-.page-header h1 {
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendar-icon {
   font-size: 24px;
-  color: #2c3e50;
 }
 
-.create-btn {
-  padding: 8px 16px;
-  background-color: #3498db;
-  color: white;
+.header-left h1 {
+  font-size: 24px;
+  color: #1a1a1a;
+  font-weight: 600;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
   border: none;
+  background-color: white;
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.text-btn {
+  padding: 8px 16px;
+  border: none;
+  background-color: white;
   border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #2980b9;
+    background-color: #f0f0f0;
   }
 }
 
-.calendar-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.nav-btn,
 .today-btn {
-  padding: 6px 12px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
-}
-
-.nav-btn {
-  background-color: #f5f5f5;
-  color: #333;
+  transition: background-color 0.2s;
 
   &:hover {
-    background-color: #e8e8e8;
+    background-color: #2563eb;
   }
 }
 
-.today-btn {
-  background-color: #f0f0f0;
-  color: #666;
-  font-size: 13px;
-
-  &:hover {
-    background-color: #e8e8e8;
-  }
-}
-
-.month-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2c3e50;
-  min-width: 120px;
-  text-align: center;
+.calendar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .calendar-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
 }
 
-.days-header {
+.week-header {
   display: flex;
-  border-bottom: 1px solid #eee;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e8e8e8;
+  flex-shrink: 0;
 }
 
-.day-cell {
-  width: 40px;
-  height: 36px;
+.week-day {
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  color: #666;
   font-weight: 500;
+  color: #666;
+  flex-shrink: 0;
 }
 
-.tasks-container {
+.calendar-body {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.calendar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  height: 100%;
+}
+
+.calendar-cell {
+  border-right: 1px solid #e8e8e8;
+  border-bottom: 1px solid #e8e8e8;
+  padding: 8px;
   position: relative;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background-color: #fafafa;
+  flex-shrink: 0;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  &:nth-child(7n) {
+    border-right: none;
+  }
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  &.other-month {
+    background-color: #fafafa;
+
+    .day-number {
+      color: #ccc;
+    }
+  }
+
+  &.today {
+    background-color: #eff6ff;
+  }
 }
 
-.track-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
+.day-number {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 500;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.today-number {
+    background-color: #3b82f6;
+    color: white;
+  }
 }
 
-.track-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: #eee;
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  overflow: hidden;
 }
 
-.empty-state {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  color: #999;
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &.task-completed {
+    opacity: 0.5;
+    text-decoration: line-through;
+  }
+}
+
+.task-checkbox {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  appearance: none;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  position: relative;
+  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+  transition: all 0.2s;
+
+  &:checked {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.9);
+
+    &::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 9px;
+      font-weight: bold;
+      color: #333;
+    }
+  }
+}
+
+.task-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .modal-overlay {
@@ -430,7 +625,7 @@ onMounted(loadTasks);
 
 .modal-header h2 {
   font-size: 18px;
-  color: #2c3e50;
+  color: #1a1a1a;
   margin: 0;
 }
 
@@ -463,7 +658,7 @@ onMounted(loadTasks);
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #2c3e50;
+  color: #1a1a1a;
   margin-bottom: 6px;
 }
 
@@ -471,14 +666,15 @@ onMounted(loadTasks);
 .form-group textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e8e8e8;
   border-radius: 6px;
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 
   &:focus {
-    border-color: #3498db;
+    border-color: #3b82f6;
   }
 }
 
@@ -511,8 +707,8 @@ onMounted(loadTasks);
 }
 
 .cancel-btn {
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: #f0f0f0;
+  color: #1a1a1a;
 
   &:hover {
     background-color: #e8e8e8;
@@ -520,20 +716,21 @@ onMounted(loadTasks);
 }
 
 .save-btn {
-  background-color: #3498db;
+  background-color: #3b82f6;
   color: white;
 
   &:hover {
-    background-color: #2980b9;
+    background-color: #2563eb;
   }
 }
 
 .delete-btn {
-  background-color: #e74c3c;
+  background-color: #ef4444;
   color: white;
+  margin-right: auto;
 
   &:hover {
-    background-color: #c0392b;
+    background-color: #dc2626;
   }
 }
 </style>
