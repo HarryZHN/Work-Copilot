@@ -9,9 +9,7 @@ const router = createRouter({
       children: [
         { path: '', redirect: '/memo' },
         { path: '/memo', component: () => import('../views/memo/index.vue') },
-        { path: '/memo/:id', component: () => import('../views/memo/detail.vue') },
-        { path: '/memo/edit/:id', component: () => import('../views/memo/edit.vue') },
-        { path: '/schedule', component: () => import('../views/ScheduleView.vue') }
+        { path: '/schedule', component: () => import('../views/schedule/index.vue') }
       ]
     }
   ]
