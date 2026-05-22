@@ -7,7 +7,7 @@ const router = createRouter({
       path: '/',
       component: () => import('../layouts/DefaultLayout.vue'),
       children: [
-        { path: '', redirect: '/memo' },
+        { path: '', redirect: '/schedule' },
         { path: '/memo', component: () => import('../views/memo/index.vue') },
         { path: '/schedule', component: () => import('../views/schedule/index.vue') }
       ]
