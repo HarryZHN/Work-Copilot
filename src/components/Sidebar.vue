@@ -25,7 +25,7 @@ defineEmits<{
         v-for="item in navItems"
         :key="item.path"
         class="nav-item"
-        @click="emit('navClick', item.path)"
+        @click="$emit('navClick', item.path)"
       >
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect v-if="item.icon === 'memo'" x="3" y="3" width="18" height="18" rx="2" ry="2"/>

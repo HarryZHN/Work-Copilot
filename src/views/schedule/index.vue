@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { db, type Task } from '@/db';
-import { formatDate, getDaysInMonth, getFirstDayOfMonth, getLastDayOfMonth, addMonths, parseDate, isDateBetween } from '@/utils/date';
+import { formatDate, getDaysInMonth, getFirstDayOfMonth, addMonths, parseDate, isDateBetween } from '@/utils/date';
 import { getTaskColor, getTaskTextColor } from '@/utils/color';
 
 const WEEK_DAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -27,7 +27,7 @@ const month = computed(() => currentDate.value.getMonth());
 const monthName = computed(() => `${year.value}年${month.value + 1}月`);
 const daysInMonth = computed(() => getDaysInMonth(year.value, month.value));
 const firstDayOfMonth = computed(() => getFirstDayOfMonth(year.value, month.value));
-const lastDayOfMonth = computed(() => getLastDayOfMonth(year.value, month.value));
+
 const firstDayOffset = computed(() => firstDayOfMonth.value.getDay());
 
 const taskRowMap = ref<Map<string, number>>(new Map());
@@ -140,25 +140,11 @@ function getTaskRow(taskId: string): number {
   return taskRowMap.value.get(taskId) || 1;
 }
 
-function getTaskWidth(task: Task): number {
-  const start = parseDate(task.startDate);
-  const end = parseDate(task.endDate);
-  const diff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  return (diff / 7) * 100;
-}
-
 function isMiddleDay(task: Task, dateStr: string): boolean {
   const start = parseDate(task.startDate);
   const end = parseDate(task.endDate);
   const current = parseDate(dateStr);
   return current > start && current < end;
-}
-
-function getMiddleDayWidth(task: Task, dateStr: string): number {
-  const start = parseDate(task.startDate);
-  const end = parseDate(task.endDate);
-  const diff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  return (1 / 7) * 100;
 }
 
 function isSameDay(date1: Date, date2: Date): boolean {
@@ -331,7 +317,7 @@ onUnmounted(() => {
               </span>
               
               <div class="task-item-wrapper">
-                  <template v-for="(task, index) in day.tasks" :key="task.id + '-' + day.date">
+                  <template v-for="task in day.tasks" :key="task.id + '-' + day.date">
                     <div
                       v-if="task.startDate === day.date"
                       class="task-item task-item-start"
