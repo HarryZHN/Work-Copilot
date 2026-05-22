@@ -5,6 +5,7 @@ import { formatDate, getDaysInMonth, getFirstDayOfMonth, getLastDayOfMonth, addM
 import { getTaskColor } from '@/utils/color';
 
 const WEEK_DAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const MAX_ROWS = 4;
 
 const currentDate = ref(new Date());
 const tasks = ref<Task[]>([]);
@@ -29,7 +30,58 @@ const firstDayOfMonth = computed(() => getFirstDayOfMonth(year.value, month.valu
 const lastDayOfMonth = computed(() => getLastDayOfMonth(year.value, month.value));
 const firstDayOffset = computed(() => firstDayOfMonth.value.getDay());
 
+const taskRowMap = ref<Map<string, number>>(new Map());
+
+function calculateTaskRows() {
+  const rowMap = new Map<string, number>();
+  const dateTasksMap = new Map<string, Task[]>();
+  
+  tasks.value.forEach(task => {
+    const start = parseDate(task.startDate);
+    const end = parseDate(task.endDate);
+    const current = new Date(start);
+    
+    while (current <= end) {
+      const dateStr = formatDate(current);
+      if (!dateTasksMap.has(dateStr)) {
+        dateTasksMap.set(dateStr, []);
+      }
+      dateTasksMap.get(dateStr)!.push(task);
+      current.setDate(current.getDate() + 1);
+    }
+  });
+  
+  const sortedDates = Array.from(dateTasksMap.keys()).sort();
+  
+  sortedDates.forEach(dateStr => {
+    const dateTaskList = dateTasksMap.get(dateStr)!;
+    const usedRows = new Set<number>();
+    
+    dateTaskList.forEach(task => {
+      if (rowMap.has(task.id)) {
+        usedRows.add(rowMap.get(task.id)!);
+      }
+    });
+    
+    dateTaskList.forEach(task => {
+      if (!rowMap.has(task.id)) {
+        for (let row = 1; row <= MAX_ROWS; row++) {
+          if (!usedRows.has(row)) {
+            rowMap.set(task.id, row);
+            usedRows.add(row);
+            break;
+          }
+        }
+      }
+    });
+  });
+  
+  taskRowMap.value = rowMap;
+}
+
 const calendarDays = computed(() => {
+  calculateTaskRows();
+  
   const days: {
     date: string;
     isCurrentMonth: boolean;
@@ -38,7 +90,6 @@ const calendarDays = computed(() => {
     tasks: Task[];
   }[] = [];
 
-  // 上一个月的日期
   const prevMonthLastDay = new Date(year.value, month.value, 0).getDate();
   for (let i = firstDayOffset.value - 1; i >= 0; i--) {
     const date = new Date(year.value, month.value - 1, prevMonthLastDay - i);
@@ -52,7 +103,6 @@ const calendarDays = computed(() => {
     });
   }
 
-  // 当前月的日期
   for (let i = 1; i <= daysInMonth.value; i++) {
     const date = new Date(year.value, month.value, i);
     const dateStr = formatDate(date);
@@ -65,7 +115,6 @@ const calendarDays = computed(() => {
     });
   }
 
-  // 下一个月的日期
   const remainingDays = 42 - days.length;
   for (let i = 1; i <= remainingDays; i++) {
     const date = new Date(year.value, month.value + 1, i);
@@ -78,7 +127,6 @@ const calendarDays = computed(() => {
       tasks: getTasksForDate(dateStr)
     });
   }
-  console.log(days);
   return days;
 });
 
@@ -86,6 +134,10 @@ function getTasksForDate(dateStr: string): Task[] {
   return tasks.value.filter(task => 
     isDateBetween(parseDate(dateStr), parseDate(task.startDate), parseDate(task.endDate))
   );
+}
+
+function getTaskRow(taskId: string): number {
+  return taskRowMap.value.get(taskId) || 1;
 }
 
 function getTaskWidth(task: Task): number {
@@ -285,7 +337,8 @@ onUnmounted(() => {
                       v-if="task.startDate === day.date"
                       class="task-item task-item-start"
                       :style="{
-                        backgroundColor: getTaskColor(task.id, task.completed)
+                        backgroundColor: getTaskColor(task.id, task.completed),
+                        gridRow: getTaskRow(task.id)
                       }"
                       :class="{ 'task-completed': task.completed }"
                       @click.stop="openEditModal(task.id)"
@@ -302,14 +355,18 @@ onUnmounted(() => {
                       v-else-if="isMiddleDay(task, day.date)"
                       class="task-item task-item-middle"
                       :style="{
-                        backgroundColor: getTaskColor(task.id, task.completed)
+                        backgroundColor: getTaskColor(task.id, task.completed),
+                        gridRow: getTaskRow(task.id)
                       }"
                       @click.stop="openEditModal(task.id)"
                     ></div>
                     <div
                       v-else-if="task.endDate === day.date"
                       class="task-item task-item-end"
-                      :style="{ backgroundColor: getTaskColor(task.id, task.completed) }"
+                      :style="{ 
+                        backgroundColor: getTaskColor(task.id, task.completed),
+                        gridRow: getTaskRow(task.id)
+                      }"
                       :class="{ 'task-completed': task.completed }"
                       @click.stop="openEditModal(task.id)"
                     ></div>
