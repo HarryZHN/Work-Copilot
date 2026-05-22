@@ -51,7 +51,8 @@ const saveMemo = async () => {
     return
   }
   
-  const memo: Memo = {
+  // 创建一个纯对象，确保不包含 Vue 响应式属性
+  const memo = {
     id: editingMemo.value?.id || Date.now().toString(),
     title: newMemo.value.title.trim(),
     content: newMemo.value.content

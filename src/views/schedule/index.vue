@@ -168,10 +168,16 @@ async function loadTasks() {
 }
 
 async function toggleComplete(id: string) {
-  const task = tasks.value.find(t => t.id === id);
+  const task = tasks.value.find(t => t.id === id)
   if (task) {
-    task.completed = !task.completed;
-    await db.tasks.put(task);
+    // 创建一个纯对象副本，避免将 Vue 响应式内部属性存入数据库
+    const updatedTask = {
+      ...task,
+      completed: !task.completed
+    }
+    await db.tasks.put(updatedTask)
+    // 更新本地响应式数据
+    task.completed = updatedTask.completed
   }
 }
 
@@ -209,7 +215,8 @@ async function saveTask() {
     alert('结束日期不能早于开始日期');
     return;
   }
-  const task: Task = {
+  // 创建一个纯对象，确保不包含 Vue 响应式属性
+  const task = {
     id: editingTask.value?.id || Date.now().toString(),
     title: newTask.value.title.trim(),
     content: newTask.value.content,
