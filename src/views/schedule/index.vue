@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { db, type Task } from '@/db';
 import { formatDate, getDaysInMonth, getFirstDayOfMonth, getLastDayOfMonth, addMonths, parseDate, isDateBetween } from '@/utils/date';
-import { getTaskColor } from '@/utils/color';
+import { getTaskColor, getTaskTextColor } from '@/utils/color';
 
 const WEEK_DAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 const MAX_ROWS = 4;
@@ -288,16 +288,15 @@ onUnmounted(() => {
   <div class="schedule-container">
     <div class="header">
       <div class="header-left">
-        <span class="calendar-icon">📅</span>
+        <button class="icon-btn" @click="openCreateModal()">新建工作排期</button>
+      </div>
+      <div class="header-center">
         <h1>{{ monthName }}</h1>
       </div>
       <div class="header-right">
-        <button class="icon-btn" @click="openCreateModal()">+</button>
-        <button class="text-btn">月 ▼</button>
         <button class="icon-btn" @click="prevMonth">&lt;</button>
         <button class="today-btn" @click="goToToday">今天</button>
         <button class="icon-btn" @click="nextMonth">&gt;</button>
-        <button class="icon-btn">…</button>
       </div>
     </div>
 
@@ -349,7 +348,7 @@ onUnmounted(() => {
                         @click.stop="toggleComplete(task.id)"
                         class="task-checkbox"
                       />
-                      <span class="task-title">{{ task.title }}</span>
+                      <span class="task-title" :style="{ color: getTaskTextColor(getTaskColor(task.id, task.completed)) }">{{ task.title }}</span>
                     </div>
                     <div
                       v-else-if="isMiddleDay(task, day.date)"
@@ -457,6 +456,12 @@ onUnmounted(() => {
   gap: 12px;
 }
 
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
 .calendar-icon {
   font-size: 24px;
 }
@@ -475,20 +480,17 @@ onUnmounted(() => {
 }
 
 .icon-btn {
-  width: 36px;
-  height: 36px;
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
   border: none;
-  background-color: white;
   border-radius: 6px;
-  font-size: 18px;
+  font-size: 14px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #f0f0f0;
+    background-color: #2980b9;
   }
 }
 

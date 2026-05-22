@@ -78,11 +78,7 @@ onMounted(loadMemos)
 <template>
   <div class="memo-container">
     <div class="page-header">
-      <h1>备忘录</h1>
       <button class="create-btn" @click="openCreate">新建备忘录</button>
-    </div>
-    
-    <div class="search-bar">
       <input
         v-model="searchQuery"
         type="text"
@@ -90,6 +86,7 @@ onMounted(loadMemos)
         class="search-input"
       />
     </div>
+    
     
     <div class="memo-list">
       <div

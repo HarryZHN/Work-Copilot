@@ -39,11 +39,21 @@ function lighten(hex: string, factor: number): string {
   return rgbToHex(r, g, b)
 }
 
+function getLuminance(r: number, g: number, b: number): number {
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255
+}
+
 export function getTaskColor(id: string, completed: boolean): string {
   const hash = simpleHash(id)
   let color = DEEP_COLORS[hash % DEEP_COLORS.length]
   if (completed) {
-    return lighten(color, 0.85)
+    return lighten(color, 0.75)
   }
   return color
+}
+
+export function getTaskTextColor(bgColor: string): string {
+  const rgb = hexToRgb(bgColor)
+  const luminance = getLuminance(rgb.r, rgb.g, rgb.b)
+  return luminance > 0.5 ? '#1a1a1a' : '#ffffff'
 }

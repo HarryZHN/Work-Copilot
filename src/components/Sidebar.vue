@@ -1,6 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
-  collapsed: boolean
+defineProps<{
   navItems: Array<{
     name: string
     icon: string
@@ -8,20 +7,15 @@ const props = defineProps<{
   }>
 }>()
 
-const emit = defineEmits<{
-  'update:collapsed': [value: boolean]
+defineEmits<{
   navClick: [path: string]
 }>()
-
-const toggleSidebar = () => {
-  emit('update:collapsed', !props.collapsed)
-}
 </script>
 
 <template>
-  <aside class="sidebar" :class="{ collapsed: collapsed }">
+  <aside class="sidebar">
     <div class="sidebar-header">
-      <div class="logo" v-if="!collapsed">
+      <div class="logo">
         <span class="logo-text">Work Copilot</span>
       </div>
     </div>
@@ -31,7 +25,6 @@ const toggleSidebar = () => {
         v-for="item in navItems"
         :key="item.path"
         class="nav-item"
-        :title="collapsed ? item.name : ''"
         @click="emit('navClick', item.path)"
       >
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -42,18 +35,9 @@ const toggleSidebar = () => {
           <polyline v-else-if="item.icon === 'schedule'" points="16 3 21 3 21 8"/>
           <line v-else-if="item.icon === 'schedule'" x1="8" y1="21" x2="12" y2="17"/>
         </svg>
-        <span v-if="!collapsed" class="nav-text">{{ item.name }}</span>
+        <span class="nav-text">{{ item.name }}</span>
       </button>
     </nav>
-    
-    <div class="sidebar-footer">
-      <button class="collapse-btn" @click="toggleSidebar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path v-if="!collapsed" d="M15 19l-7-7 7-7"/>
-          <path v-else d="M9 5l7 7-7 7"/>
-        </svg>
-      </button>
-    </div>
   </aside>
 </template>
 
@@ -68,12 +52,7 @@ const toggleSidebar = () => {
   color: #ecf0f1;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
   z-index: 100;
-
-  &.collapsed {
-    width: 56px;
-  }
 }
 
 .sidebar-header {
@@ -120,32 +99,5 @@ const toggleSidebar = () => {
   font-size: 14px;
 }
 
-.sidebar-footer {
-  padding: 10px;
-  border-top: 1px solid #34495e;
-}
 
-.collapse-btn {
-  width: 100%;
-  padding: 10px;
-  background: none;
-  border: none;
-  color: #bdc3c7;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #34495e;
-    color: #ecf0f1;
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-}
 </style>
