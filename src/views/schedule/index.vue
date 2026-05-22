@@ -78,7 +78,7 @@ const calendarDays = computed(() => {
       tasks: getTasksForDate(dateStr)
     });
   }
-
+  console.log(days);
   return days;
 });
 
@@ -86,6 +86,27 @@ function getTasksForDate(dateStr: string): Task[] {
   return tasks.value.filter(task => 
     isDateBetween(parseDate(dateStr), parseDate(task.startDate), parseDate(task.endDate))
   );
+}
+
+function getTaskWidth(task: Task): number {
+  const start = parseDate(task.startDate);
+  const end = parseDate(task.endDate);
+  const diff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  return (diff / 7) * 100;
+}
+
+function isMiddleDay(task: Task, dateStr: string): boolean {
+  const start = parseDate(task.startDate);
+  const end = parseDate(task.endDate);
+  const current = parseDate(dateStr);
+  return current > start && current < end;
+}
+
+function getMiddleDayWidth(task: Task, dateStr: string): number {
+  const start = parseDate(task.startDate);
+  const end = parseDate(task.endDate);
+  const diff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  return (1 / 7) * 100;
 }
 
 function isSameDay(date1: Date, date2: Date): boolean {
@@ -201,6 +222,7 @@ function handleResize() {
 
 onMounted(() => {
   loadTasks();
+  console.log(tasks.value);
   calculateSize();
   window.addEventListener('resize', handleResize);
 });
@@ -257,24 +279,42 @@ onUnmounted(() => {
                 {{ day.dayOfMonth }}
               </span>
               
-              <div class="tasks-list">
-                <div
-                  v-for="task in day.tasks.slice(0, 3)"
-                  :key="task.id"
-                  class="task-item"
-                  :style="{ backgroundColor: getTaskColor(task.id, task.completed) }"
-                  :class="{ 'task-completed': task.completed }"
-                  @click.stop="openEditModal(task.id)"
-                >
-                  <input
-                    type="checkbox"
-                    :checked="task.completed"
-                    @click.stop="toggleComplete(task.id)"
-                    class="task-checkbox"
-                  />
-                  <span class="task-title">{{ task.title }}</span>
+              <div class="task-item-wrapper">
+                  <template v-for="(task, index) in day.tasks" :key="task.id + '-' + day.date">
+                    <div
+                      v-if="task.startDate === day.date"
+                      class="task-item task-item-start"
+                      :style="{
+                        backgroundColor: getTaskColor(task.id, task.completed)
+                      }"
+                      :class="{ 'task-completed': task.completed }"
+                      @click.stop="openEditModal(task.id)"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="task.completed"
+                        @click.stop="toggleComplete(task.id)"
+                        class="task-checkbox"
+                      />
+                      <span class="task-title">{{ task.title }}</span>
+                    </div>
+                    <div
+                      v-else-if="isMiddleDay(task, day.date)"
+                      class="task-item task-item-middle"
+                      :style="{
+                        backgroundColor: getTaskColor(task.id, task.completed)
+                      }"
+                      @click.stop="openEditModal(task.id)"
+                    ></div>
+                    <div
+                      v-else-if="task.endDate === day.date"
+                      class="task-item task-item-end"
+                      :style="{ backgroundColor: getTaskColor(task.id, task.completed) }"
+                      :class="{ 'task-completed': task.completed }"
+                      @click.stop="openEditModal(task.id)"
+                    ></div>
+                  </template>
                 </div>
-              </div>
             </div>
           </div>
         </div>
@@ -472,6 +512,7 @@ onUnmounted(() => {
 }
 
 .calendar-cell {
+  overflow: visible;
   width: 14%;
   border: 1px solid #e8e8e8;
   position: relative;
@@ -481,12 +522,7 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 4px;
   cursor: pointer;
-  overflow: hidden;
   box-sizing: border-box;
-
-  &:nth-child(7n) {
-    border-right: none;
-  }
 
   &:hover {
     background-color: #f8f9fa;
@@ -523,21 +559,22 @@ onUnmounted(() => {
   }
 }
 
-.tasks-list {
+.task-item-wrapper {
+  gap: 1px;
+  margin: 0 -1px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  overflow: hidden;
   width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
 }
 
 .task-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 6px;
-  border-radius: 4px;
+  height: 100%;
   font-size: 11px;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -545,6 +582,7 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  box-sizing: border-box;
 
   &:hover {
     opacity: 0.9;
@@ -553,6 +591,30 @@ onUnmounted(() => {
   &.task-completed {
     opacity: 0.5;
     text-decoration: line-through;
+  }
+
+  &.task-item-start {
+    
+    border-radius: 4px 0 0 4px;
+    padding-left: 6px;
+    padding-right: 2px;
+    flex-shrink: 0;
+    width: calc(100% + 2px);
+  }
+
+  &.task-item-middle {
+    border-radius: 0;
+    padding: 0;
+    width: calc(100% + 2px);
+
+  }
+
+  &.task-item-end {
+    border-radius: 0 4px 4px 0;
+    padding-left: 2px;
+    padding-right: 6px;
+    width: 100%;
+    margin-right: -4px;
   }
 }
 
