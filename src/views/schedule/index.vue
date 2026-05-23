@@ -147,6 +147,10 @@ function isMiddleDay(task: Task, dateStr: string): boolean {
   return current > start && current < end;
 }
 
+function isOneDayTask(task: Task): boolean {
+  return task.startDate === task.endDate;
+}
+
 function isSameDay(date1: Date, date2: Date): boolean {
   return formatDate(date1) === formatDate(date2);
 }
@@ -326,7 +330,25 @@ onUnmounted(() => {
               <div class="task-item-wrapper">
                   <template v-for="task in day.tasks" :key="task.id + '-' + day.date">
                     <div
-                      v-if="task.startDate === day.date"
+                      v-if="task.startDate === day.date && task.endDate === day.date"
+                      class="task-item task-item-one-day"
+                      :style="{
+                        backgroundColor: getTaskColor(task.id, task.completed),
+                        gridRow: getTaskRow(task.id)
+                      }"
+                      :class="{ 'task-completed': task.completed }"
+                      @click.stop="openEditModal(task.id)"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="task.completed"
+                        @click.stop="toggleComplete(task.id)"
+                        class="task-checkbox"
+                      />
+                      <span class="task-title" :style="{ color: getTaskTextColor(getTaskColor(task.id, task.completed)) }">{{ task.title }}</span>
+                    </div>
+                    <div
+                      v-else-if="task.startDate === day.date"
                       class="task-item task-item-start"
                       :style="{
                         backgroundColor: getTaskColor(task.id, task.completed),
@@ -667,6 +689,14 @@ onUnmounted(() => {
     padding-right: 6px;
     width: 100%;
     margin-right: -4px;
+  }
+
+  &.task-item-one-day {
+    border-radius: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    flex-shrink: 0;
+    width: calc(100% + 2px);
   }
 }
 
