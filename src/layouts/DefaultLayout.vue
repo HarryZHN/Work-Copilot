@@ -175,20 +175,6 @@ const handleFileChange = async (event: Event) => {
             </div>
           </div>
           <div class="help-section">
-            <div class="section-icon">📅</div>
-            <div class="section-content">
-              <h3>排期管理</h3>
-              <p>在排期表中，你可以创建、编辑和删除任务，支持跨天任务展示。</p>
-            </div>
-          </div>
-          <div class="help-section">
-            <div class="section-icon">📝</div>
-            <div class="section-content">
-              <h3>备忘录</h3>
-              <p>快速记录重要事项，支持搜索功能。</p>
-            </div>
-          </div>
-          <div class="help-section">
             <div class="section-icon">💾</div>
             <div class="section-content">
               <h3>数据备份</h3>
