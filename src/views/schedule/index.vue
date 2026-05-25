@@ -147,9 +147,6 @@ function isMiddleDay(task: Task, dateStr: string): boolean {
   return current > start && current < end;
 }
 
-function isOneDayTask(task: Task): boolean {
-  return task.startDate === task.endDate;
-}
 
 function isSameDay(date1: Date, date2: Date): boolean {
   return formatDate(date1) === formatDate(date2);

@@ -15,15 +15,25 @@ export interface Task {
   completed: boolean
 }
 
+export interface TodayTask {
+  id: string
+  title: string
+  content: string
+  date: string
+  completed: boolean
+}
+
 export class AppDB extends Dexie {
   memos!: Table<Memo, string>
   tasks!: Table<Task, string>
+  todayTasks!: Table<TodayTask, string>
 
   constructor() {
     super('WorkCopilotDB')
-    this.version(1).stores({
+    this.version(2).stores({
       memos: 'id',
-      tasks: 'id'
+      tasks: 'id',
+      todayTasks: 'id, date'
     })
   }
 }

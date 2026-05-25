@@ -9,6 +9,7 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const showHelpModal = ref(false)
 
 const navItems = [
+  { name: '今日待办', icon: 'today', path: '/today' },
   { name: '排期表', icon: 'schedule', path: '/schedule' },
   { name: '备忘录', icon: 'memo', path: '/memo' }
 ]

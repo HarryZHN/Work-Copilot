@@ -41,6 +41,8 @@ const openGitHub = () => {
           <path v-else-if="item.icon === 'schedule'" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           <polyline v-else-if="item.icon === 'schedule'" points="16 3 21 3 21 8"/>
           <line v-else-if="item.icon === 'schedule'" x1="8" y1="21" x2="12" y2="17"/>
+          <circle v-else-if="item.icon === 'today'" cx="12" cy="12" r="10"/>
+          <polyline v-else-if="item.icon === 'today'" points="12 6 12 12 16 14"/>
         </svg>
         <span class="nav-text">{{ item.name }}</span>
       </button>
