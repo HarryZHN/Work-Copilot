@@ -255,9 +255,7 @@ onMounted(() => {
         </button>
       </div>
       <div class="header-center">
-        <span class="header-decoration">🌸</span>
         <h1>{{ monthName }}</h1>
-        <span class="header-decoration">🌺</span>
       </div>
       <div class="header-right">
         <button class="nav-btn" @click="prevMonth">◀</button>
@@ -444,12 +442,12 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 18px 24px;
+  margin-bottom: 12px;
+  padding: 10px 18px;
   background: linear-gradient(145deg, #FFFFFF 0%, #FFFDE7 100%);
-  border-radius: 20px;
-  border: 4px solid #8D6E63;
-  box-shadow: 0 5px 0 #6D4C41, 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  border: 3px solid #8D6E63;
+  box-shadow: 0 4px 0 #6D4C41, 0 8px 16px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
@@ -468,12 +466,12 @@ onMounted(() => {
 }
 
 .header-decoration {
-  font-size: 28px;
+  font-size: 20px;
   animation: float 3s ease-in-out infinite;
 }
 
 .header-center h1 {
-  font-size: 26px;
+  font-size: 18px;
   color: #5D4037;
   font-weight: 700;
   margin: 0;
@@ -486,27 +484,27 @@ onMounted(() => {
 }
 
 .icon-btn {
-  padding: 12px 20px;
+  padding: 8px 14px;
   background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%);
   color: white;
-  border: 3px solid #2E7D32;
-  border-radius: 14px;
-  font-size: 15px;
+  border: 2px solid #2E7D32;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 3px 0 #2E7D32;
+  box-shadow: 0 2px 0 #2E7D32;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 
   .btn-emoji {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 0 #2E7D32;
+    box-shadow: 0 4px 0 #2E7D32;
     background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
   }
 
@@ -517,17 +515,17 @@ onMounted(() => {
 }
 
 .nav-btn {
-  width: 46px;
-  height: 46px;
-  border: 3px solid #8D6E63;
+  width: 38px;
+  height: 38px;
+  border: 2px solid #8D6E63;
   background: linear-gradient(145deg, #FFF8E1 0%, #FFE082 100%);
-  border-radius: 14px;
-  font-size: 18px;
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
   color: #5D4037;
-  box-shadow: 0 3px 0 #6D4C41;
+  box-shadow: 0 2px 0 #6D4C41;
 
   &:hover {
     transform: translateY(-2px);
@@ -542,22 +540,22 @@ onMounted(() => {
 }
 
 .today-btn {
-  padding: 12px 20px;
-  border: 3px solid #2E7D32;
+  padding: 8px 14px;
+  border: 2px solid #2E7D32;
   background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%);
   color: white;
-  border-radius: 14px;
-  font-size: 15px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 3px 0 #2E7D32;
+  box-shadow: 0 2px 0 #2E7D32;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 
   .btn-star {
-    font-size: 18px;
+    font-size: 16px;
     animation: sparkle 1.5s ease-in-out infinite;
   }
 
@@ -600,19 +598,19 @@ onMounted(() => {
 }
 
 .week-day {
-  height: 56px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 15px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 700;
   color: #5D4037;
   flex-shrink: 0;
 }
 
 .week-emoji {
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .calendar-body {

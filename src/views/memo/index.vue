@@ -80,7 +80,11 @@ onMounted(loadMemos)
 <template>
   <div class="memo-container">
     <div class="page-header">
-      <h1 class="page-title">📔 我的备忘录 ✨</h1>
+      <h1 class="page-title">
+        <button class="create-btn" @click="openCreate">
+          <span class="btn-emoji">➕</span> 新建备忘录
+        </button>
+      </h1>
       <div class="header-actions">
         <input
           v-model="searchQuery"
@@ -88,9 +92,6 @@ onMounted(loadMemos)
           placeholder="🔍 搜索备忘录..."
           class="search-input"
         />
-        <button class="create-btn" @click="openCreate">
-          <span class="btn-emoji">➕</span> 新建备忘录
-        </button>
       </div>
     </div>
     
@@ -187,7 +188,6 @@ onMounted(loadMemos)
   color: #5D4037;
   margin: 0;
   text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
-  animation: float 3s ease-in-out infinite;
 }
 
 .header-actions {

@@ -170,8 +170,7 @@ onMounted(loadTasks)
   <div class="today-container">
     <div class="header">
       <div class="header-left">
-        <span class="header-decoration">🎯</span>
-        <h1>今日待办</h1>
+
       </div>
       <div class="header-center">
         <button class="mode-btn" :class="{ active: viewMode === 'day' }" @click="viewMode = 'day'">
@@ -199,7 +198,6 @@ onMounted(loadTasks)
           :class="{ 'today-column': isToday(date) }"
         >
           <div class="day-header" :class="{ 'today-header': isToday(date) }">
-            <span class="day-emoji">{{ getDayEmoji(date) }}</span>
             <span class="day-of-week">周{{ getDayOfWeek(date) }}</span>
             <span class="date-label">{{ getDateLabel(date) }}</span>
             <span v-if="isToday(date)" class="today-badge">今天！</span>
@@ -315,27 +313,27 @@ onMounted(loadTasks)
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 18px 24px;
+  margin-bottom: 12px;
+  padding: 10px 18px;
   background: linear-gradient(145deg, #FFFFFF 0%, #FFFDE7 100%);
-  border-radius: 20px;
-  border: 4px solid #8D6E63;
-  box-shadow: 0 5px 0 #6D4C41, 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  border: 3px solid #8D6E63;
+  box-shadow: 0 4px 0 #6D4C41, 0 8px 16px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   
   .header-decoration {
-    font-size: 32px;
+    font-size: 24px;
     animation: bounce-soft 2s ease-in-out infinite;
   }
   
   h1 {
-    font-size: 26px;
+    font-size: 20px;
     color: #5D4037;
     font-weight: 700;
     margin: 0;
@@ -344,29 +342,29 @@ onMounted(loadTasks)
 
 .header-center {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   background: #FFF8E1;
-  padding: 6px;
-  border-radius: 16px;
-  border: 3px solid #FFE082;
+  padding: 4px;
+  border-radius: 12px;
+  border: 2px solid #FFE082;
 }
 
 .mode-btn {
-  padding: 10px 20px;
-  border: 3px solid transparent;
+  padding: 6px 14px;
+  border: 2px solid transparent;
   background: transparent;
-  border-radius: 12px;
-  font-size: 15px;
+  border-radius: 10px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   color: #795548;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 
   .btn-emoji {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   &.active {
@@ -389,17 +387,17 @@ onMounted(loadTasks)
 }
 
 .icon-btn {
-  width: 46px;
-  height: 46px;
-  border: 3px solid #8D6E63;
+  width: 38px;
+  height: 38px;
+  border: 2px solid #8D6E63;
   background: linear-gradient(145deg, #FFF8E1 0%, #FFE082 100%);
-  border-radius: 14px;
-  font-size: 18px;
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
   color: #5D4037;
-  box-shadow: 0 3px 0 #6D4C41;
+  box-shadow: 0 2px 0 #6D4C41;
 
   &:hover {
     transform: translateY(-2px);
@@ -414,22 +412,22 @@ onMounted(loadTasks)
 }
 
 .today-btn {
-  padding: 12px 24px;
-  border: 3px solid #2E7D32;
+  padding: 8px 16px;
+  border: 2px solid #2E7D32;
   background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%);
   color: white;
-  border-radius: 14px;
-  font-size: 15px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 3px 0 #2E7D32;
+  box-shadow: 0 2px 0 #2E7D32;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 
   .btn-star {
-    font-size: 18px;
+    font-size: 16px;
     animation: sparkle 1.5s ease-in-out infinite;
   }
 
@@ -493,13 +491,13 @@ onMounted(loadTasks)
 }
 
 .day-header {
-  padding: 20px;
+  padding: 12px 16px;
   background: linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%);
-  border-bottom: 4px dashed #A1887F;
+  border-bottom: 3px dashed #A1887F;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   position: relative;
 
   &.today-header {
@@ -519,28 +517,28 @@ onMounted(loadTasks)
 }
 
 .day-emoji {
-  font-size: 36px;
+  font-size: 24px;
   animation: float 3s ease-in-out infinite;
 }
 
 .day-of-week {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   color: #5D4037;
 }
 
 .date-label {
-  font-size: 13px;
+  font-size: 12px;
   color: #795548;
 }
 
 .today-badge {
   position: absolute;
-  top: 10px;
-  right: 15px;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  top: 6px;
+  right: 10px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 11px;
   font-weight: 700;
   background: #81C784;
   color: white;
