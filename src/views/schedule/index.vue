@@ -711,7 +711,6 @@ onMounted(() => {
   flex: 1;
   display: grid;
   grid-template-rows: repeat(4, 1fr);
-  padding: 4px 6px 8px;
 }
 
 .task-item {
@@ -758,7 +757,7 @@ onMounted(() => {
     border-radius: 0 10px 10px 0;
     padding-left: 4px;
     padding-right: 8px;
-    width: 100%;
+    width: calc(100% + 4px);
     margin-right: -4px;
   }
 
