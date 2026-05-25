@@ -1,8 +1,8 @@
 export const DEEP_COLORS = [
-  '#1E40AF', '#1C4CA6', '#7C2D12', '#134E4A', '#581C87',
-  '#4D1F00', '#0C4A6E', '#1E293B', '#3B0764', '#1F1F1F',
-  '#0F4C5C', '#5E2B00', '#4C0519', '#0D3B66', '#1A365D',
-  '#2D1B69', '#3C1642', '#2B2D42', '#1A120B', '#0E46A3'
+  '#FF8A80', '#FF80AB', '#EA80FC', '#B388FF', '#8C9EFF',
+  '#82B1FF', '#80D8FF', '#84FFFF', '#B9F6CA', '#CCFF90',
+  '#F4FF81', '#FFFF8D', '#FFE57F', '#FFD180', '#FF9E80',
+  '#A5D6A7', '#81D4FA', '#FFAB91', '#CE93D8', '#90CAF9'
 ]
 
 function simpleHash(str: string): number {

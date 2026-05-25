@@ -11,24 +11,105 @@ html, body, #app {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f5f5;
+  font-family: "Comic Sans MS", "Chalkboard", "Marker Felt", "Varela Round", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%);
+  background-attachment: fixed;
 }
 
+/* 可爱的滚动条 */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
+  background: linear-gradient(180deg, #FFB74D 0%, #FF8A65 100%);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: linear-gradient(180deg, #FFA726 0%, #FF7043 100%);
+}
+
+/* 动森风格按钮动画 */
+@keyframes bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* 可爱的选择框 */
+::selection {
+  background: #FFE082;
+  color: #5D4037;
+}
+
+/* 通用按钮风格 */
+.ac-btn {
+  border: none;
+  border-radius: 20px;
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  top: 0;
+}
+
+.ac-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.ac-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 输入框风格 */
+.ac-input {
+  border: 3px solid #8D6E63;
+  border-radius: 15px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+  background: #FFF8E1;
+}
+
+.ac-input:focus {
+  border-color: #FF8A65;
+  box-shadow: 0 0 0 4px rgba(255, 138, 101, 0.2);
+  transform: scale(1.02);
+}
+
+/* 卡片风格 */
+.ac-card {
+  background: linear-gradient(145deg, #FFFFFF 0%, #FFFDE7 100%);
+  border-radius: 20px;
+  border: 4px solid #8D6E63;
+  box-shadow: 0 6px 0 #6D4C41, 0 10px 25px rgba(0, 0, 0, 0.15);
 }

@@ -5,6 +5,7 @@ import { formatDate, getDaysInMonth, getFirstDayOfMonth, addMonths, parseDate, i
 import { getTaskColor, getTaskTextColor } from '@/utils/color';
 
 const WEEK_DAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const WEEK_EMOJIS = ['☀️', '🌸', '🌿', '🌺', '🍀', '🌻', '🌙'];
 const MAX_ROWS = 4;
 
 const currentDate = ref(new Date());
@@ -13,7 +14,7 @@ const showModal = ref(false);
 const editingTask = ref<Task | null>(null);
 const calendarWrapper = ref<HTMLElement | null>(null);
 const cellWidth = ref(100);
-const cellHeight = ref(120);
+const cellHeight = ref(220);
 
 const newTask = ref({
   title: '',
@@ -171,13 +172,11 @@ async function loadTasks() {
 async function toggleComplete(id: string) {
   const task = tasks.value.find(t => t.id === id)
   if (task) {
-    // 创建一个纯对象副本，避免将 Vue 响应式内部属性存入数据库
     const updatedTask = {
       ...task,
       completed: !task.completed
     }
     await db.tasks.put(updatedTask)
-    // 更新本地响应式数据
     task.completed = updatedTask.completed
   }
 }
@@ -209,14 +208,13 @@ function openCreateModal(dateStr?: string) {
 
 async function saveTask() {
   if (!newTask.value.title.trim()) {
-    alert('请输入任务标题');
+    alert('请输入任务标题~');
     return;
   }
   if (newTask.value.startDate > newTask.value.endDate) {
-    alert('结束日期不能早于开始日期');
+    alert('结束日期不能早于开始日期哦~');
     return;
   }
-  // 创建一个纯对象，确保不包含 Vue 响应式属性
   const task = {
     id: editingTask.value?.id || Date.now().toString(),
     title: newTask.value.title.trim(),
@@ -242,39 +240,8 @@ function closeModal() {
   editingTask.value = null;
 }
 
-function calculateSize() {
-  nextTick(() => {
-    if (calendarWrapper.value) {
-      const wrapperRect = calendarWrapper.value.getBoundingClientRect();
-      // 减去padding和边框
-      const availableWidth = wrapperRect.width - 48;
-      const availableHeight = wrapperRect.height - 44 - 16; // 减去header高度和间距
-      
-      cellWidth.value = Math.max(80, Math.floor(availableWidth / 7));
-      cellHeight.value = Math.max(80, Math.floor(availableHeight / 6));
-    }
-  });
-}
-
-let resizeTimer: number | null = null;
-function handleResize() {
-  if (resizeTimer) {
-    clearTimeout(resizeTimer);
-  }
-  resizeTimer = window.setTimeout(() => {
-    calculateSize();
-  }, 100);
-}
-
 onMounted(() => {
   loadTasks();
-  console.log(tasks.value);
-  calculateSize();
-  window.addEventListener('resize', handleResize);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize);
 });
 </script>
 
@@ -282,15 +249,23 @@ onUnmounted(() => {
   <div class="schedule-container">
     <div class="header">
       <div class="header-left">
-        <button class="icon-btn" @click="openCreateModal()">新建工作排期</button>
+        <button class="icon-btn" @click="openCreateModal()">
+          <span class="btn-emoji">📅</span>
+          新建工作排期
+        </button>
       </div>
       <div class="header-center">
+        <span class="header-decoration">🌸</span>
         <h1>{{ monthName }}</h1>
+        <span class="header-decoration">🌺</span>
       </div>
       <div class="header-right">
-        <button class="icon-btn" @click="prevMonth">&lt;</button>
-        <button class="today-btn" @click="goToToday">今天</button>
-        <button class="icon-btn" @click="nextMonth">&gt;</button>
+        <button class="nav-btn" @click="prevMonth">◀</button>
+        <button class="today-btn" @click="goToToday">
+          <span class="btn-star">⭐</span>
+          今天
+        </button>
+        <button class="nav-btn" @click="nextMonth">▶</button>
       </div>
     </div>
 
@@ -303,6 +278,7 @@ onUnmounted(() => {
             class="week-day"
             style="width: 14%"
           >
+            <span class="week-emoji">{{ WEEK_EMOJIS[index] }}</span>
             {{ day }}
           </div>
         </div>
@@ -313,7 +289,6 @@ onUnmounted(() => {
               v-for="(day, dayIndex) in calendarDays"
               :key="dayIndex"
               class="calendar-cell"
-              :style="{ height: `${cellHeight}px` }"
               :class="{
                 'other-month': !day.isCurrentMonth,
                 'today': day.isToday
@@ -392,50 +367,64 @@ onUnmounted(() => {
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
+          <span class="modal-decoration">✨</span>
           <h2>{{ editingTask ? '编辑任务' : '新建任务' }}</h2>
           <button class="close-btn" @click="closeModal">×</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label>任务标题 *</label>
+            <label>📝 任务标题 *</label>
             <input
               v-model="newTask.title"
               type="text"
-              placeholder="请输入任务标题"
+              placeholder="要做什么呢~"
+              class="cute-input"
             />
           </div>
 
           <div class="form-group">
-            <label>详细内容</label>
+            <label>💭 详细内容</label>
             <textarea
               v-model="newTask.content"
-              placeholder="请输入详细内容（可选）"
+              placeholder="还有什么补充的吗~"
+              class="cute-textarea"
             ></textarea>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>开始日期 *</label>
+              <label>🚀 开始日期 *</label>
               <input
                 v-model="newTask.startDate"
                 type="date"
+                class="cute-input"
               />
             </div>
             <div class="form-group">
-              <label>结束日期 *</label>
+              <label>🏁 结束日期 *</label>
               <input
                 v-model="newTask.endDate"
                 type="date"
+                class="cute-input"
               />
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button v-if="editingTask" class="delete-btn" @click="deleteTask">删除</button>
-          <button class="cancel-btn" @click="closeModal">取消</button>
-          <button class="save-btn" @click="saveTask">保存</button>
+          <button v-if="editingTask" class="delete-btn" @click="deleteTask">
+            <span class="btn-emoji">🗑️</span>
+            删除
+          </button>
+          <button class="cancel-btn" @click="closeModal">
+            <span class="btn-emoji">✖️</span>
+            取消
+          </button>
+          <button class="save-btn" @click="saveTask">
+            <span class="btn-emoji">💾</span>
+            保存
+          </button>
         </div>
       </div>
     </div>
@@ -448,7 +437,6 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #f5f7fa;
   box-sizing: border-box;
 }
 
@@ -456,9 +444,12 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 20px;
+  padding: 18px 24px;
+  background: linear-gradient(145deg, #FFFFFF 0%, #FFFDE7 100%);
+  border-radius: 20px;
+  border: 4px solid #8D6E63;
+  box-shadow: 0 5px 0 #6D4C41, 0 10px 20px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
@@ -472,66 +463,113 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 12px;
 }
 
-.calendar-icon {
-  font-size: 24px;
+.header-decoration {
+  font-size: 28px;
+  animation: float 3s ease-in-out infinite;
 }
 
-.header-left h1 {
-  font-size: 24px;
-  color: #1a1a1a;
-  font-weight: 600;
+.header-center h1 {
+  font-size: 26px;
+  color: #5D4037;
+  font-weight: 700;
   margin: 0;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .icon-btn {
-  padding: 8px 16px;
-  background-color: #3498db;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%);
   color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  border: 3px solid #2E7D32;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 3px 0 #2E7D32;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .btn-emoji {
+    font-size: 18px;
+  }
 
   &:hover {
-    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #2E7D32;
+    background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #2E7D32;
   }
 }
 
-.text-btn {
-  padding: 8px 16px;
-  border: none;
-  background-color: white;
-  border-radius: 6px;
-  font-size: 14px;
+.nav-btn {
+  width: 46px;
+  height: 46px;
+  border: 3px solid #8D6E63;
+  background: linear-gradient(145deg, #FFF8E1 0%, #FFE082 100%);
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  color: #5D4037;
+  box-shadow: 0 3px 0 #6D4C41;
 
   &:hover {
-    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #6D4C41;
+    background: linear-gradient(145deg, #FFE082 0%, #FFCA28 100%);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #6D4C41;
   }
 }
 
 .today-btn {
-  padding: 8px 16px;
-  border: none;
-  background-color: #3b82f6;
+  padding: 12px 20px;
+  border: 3px solid #2E7D32;
+  background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%);
   color: white;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 3px 0 #2E7D32;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .btn-star {
+    font-size: 18px;
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
 
   &:hover {
-    background-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #2E7D32;
+    background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #2E7D32;
   }
 }
 
@@ -544,9 +582,10 @@ onUnmounted(() => {
 }
 
 .calendar-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(145deg, #FFFFFF 0%, #FFFDE7 100%);
+  border-radius: 20px;
+  border: 4px solid #8D6E63;
+  box-shadow: 0 5px 0 #6D4C41, 0 10px 20px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -555,25 +594,31 @@ onUnmounted(() => {
 
 .week-header {
   display: flex;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e8e8e8;
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%);
+  border-bottom: 4px dashed #A1887F;
   flex-shrink: 0;
 }
 
 .week-day {
-  height: 44px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 500;
-  color: #666;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #5D4037;
   flex-shrink: 0;
+}
+
+.week-emoji {
+  font-size: 20px;
 }
 
 .calendar-body {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   min-height: 0;
 }
 
@@ -584,8 +629,10 @@ onUnmounted(() => {
 
 .calendar-cell {
   overflow: visible;
-  width: 14%;
-  border: 1px solid #e8e8e8;
+  width: 14.28%;
+  min-height: 220px;
+  height: 220px;
+  border: 2px solid #FFE082;
   position: relative;
   flex-shrink: 0;
   background-color: white;
@@ -594,69 +641,82 @@ onUnmounted(() => {
   gap: 4px;
   cursor: pointer;
   box-sizing: border-box;
+  transition: all 0.2s;
 
   &:hover {
-    background-color: #f8f9fa;
+    background-color: #FFFDE7;
+    border-color: #FFCA28;
   }
 
   &.other-month {
-    background-color: #fafafa;
+    background-color: #F5F5F5;
 
     .day-number {
-      color: #ccc;
+      color: #BDBDBD;
     }
   }
 
   &.today {
-    background-color: #eff6ff;
+    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+    border-color: #FF8A65;
   }
 }
 
 .day-number {
-  font-size: 10px;
-  color: #1a1a1a;
-  font-weight: 500;
-  width: 20px;
-  height: 20px;
+  font-size: 16px;
+  color: #5D4037;
+  font-weight: 700;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   flex-shrink: 0;
+  margin: 8px;
+  background: linear-gradient(145deg, #FFF8E1 0%, #FFE082 100%);
+  border: 2px solid #8D6E63;
 
   &.today-number {
-    background-color: #3b82f6;
+    background: linear-gradient(135deg, #FFB74D 0%, #FF8A65 100%);
     color: white;
+    border-color: #E64A19;
+    box-shadow: 0 2px 0 #E64A19;
+    animation: sparkle 2s ease-in-out infinite;
   }
 }
 
 .task-item-wrapper {
-  gap: 1px;
-  margin: 0 -1px;
+  gap: 6px;
+  margin: 0 -2px;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  flex: 1;
   display: grid;
   grid-template-rows: repeat(4, 1fr);
+  padding: 4px 6px 8px;
 }
 
 .task-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   height: 100%;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   box-sizing: border-box;
+  border: 2px solid rgba(255, 255, 255, 0.6);
 
   &:hover {
     opacity: 0.9;
+    transform: scale(1.02);
+    z-index: 10;
   }
 
   &.task-completed {
@@ -665,53 +725,51 @@ onUnmounted(() => {
   }
 
   &.task-item-start {
-    
-    border-radius: 4px 0 0 4px;
-    padding-left: 6px;
-    padding-right: 2px;
+    border-radius: 10px 0 0 10px;
+    padding-left: 8px;
+    padding-right: 4px;
     flex-shrink: 0;
-    width: calc(100% + 2px);
+    width: calc(100% + 4px);
   }
 
   &.task-item-middle {
     border-radius: 0;
     padding: 0;
-    width: calc(100% + 2px);
-
+    width: calc(100% + 4px);
   }
 
   &.task-item-end {
-    border-radius: 0 4px 4px 0;
-    padding-left: 2px;
-    padding-right: 6px;
+    border-radius: 0 10px 10px 0;
+    padding-left: 4px;
+    padding-right: 8px;
     width: 100%;
     margin-right: -4px;
   }
 
   &.task-item-one-day {
-    border-radius: 4px;
-    padding-left: 6px;
-    padding-right: 6px;
+    border-radius: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
     flex-shrink: 0;
-    width: calc(100% + 2px);
+    width: calc(100% + 4px);
   }
 }
 
 .task-checkbox {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
   appearance: none;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.9);
   cursor: pointer;
   position: relative;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
   transition: all 0.2s;
 
   &:checked {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.95);
 
     &::after {
       content: '✓';
@@ -719,10 +777,15 @@ onUnmounted(() => {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 9px;
+      font-size: 10px;
       font-weight: bold;
-      color: #333;
+      color: #4CAF50;
     }
+  }
+
+  &:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.5);
   }
 }
 
@@ -731,6 +794,7 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .modal-overlay {
@@ -739,86 +803,119 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(93, 64, 55, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(145deg, #FFFFFF 0%, #FFFDE7 100%);
+  border-radius: 24px;
   width: 90%;
-  max-width: 500px;
+  max-width: 540px;
   overflow: hidden;
+  border: 5px solid #8D6E63;
+  box-shadow: 0 8px 0 #6D4C41, 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
-}
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 4px dashed #A1887F;
+  background: linear-gradient(135deg, #FFB74D 0%, #FF8A65 100%);
+  color: white;
+  position: relative;
 
-.modal-header h2 {
-  font-size: 18px;
-  color: #1a1a1a;
-  margin: 0;
+  .modal-decoration {
+    font-size: 26px;
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+  }
 }
 
 .close-btn {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: none;
-  font-size: 24px;
-  color: #999;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: 3px solid white;
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 26px;
   cursor: pointer;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
+  font-weight: bold;
+  line-height: 1;
 
   &:hover {
-    color: #666;
+    background: white;
+    color: #FF8A65;
+    transform: translateY(-50%) scale(1.1);
   }
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 24px;
 }
 
 .form-group {
-  margin-bottom: 16px;
-}
+  margin-bottom: 20px;
 
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-  margin-bottom: 6px;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #e8e8e8;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-
-  &:focus {
-    border-color: #3b82f6;
+  label {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #5D4037;
+    margin-bottom: 8px;
   }
 }
 
-.form-group textarea {
-  min-height: 100px;
+.cute-input,
+.cute-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 3px solid #8D6E63;
+  border-radius: 14px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+  background: #FFF8E1;
+  color: #5D4037;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #A1887F;
+  }
+
+  &:focus {
+    border-color: #FF8A65;
+    box-shadow: 0 0 0 5px rgba(255, 138, 101, 0.2);
+    transform: scale(1.02);
+    background: white;
+  }
+}
+
+.cute-textarea {
+  min-height: 120px;
   resize: vertical;
 }
 
@@ -832,44 +929,79 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 16px 20px;
-  border-top: 1px solid #eee;
+  padding: 18px 24px;
+  border-top: 4px dashed #A1887F;
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 235, 59, 0.2) 100%);
 }
 
 .modal-footer button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 3px solid;
+
+  .btn-emoji {
+    font-size: 18px;
+  }
 }
 
 .cancel-btn {
-  background-color: #f0f0f0;
-  color: #1a1a1a;
+  background: linear-gradient(145deg, #FFF8E1 0%, #FFE082 100%);
+  color: #5D4037;
+  border-color: #8D6E63;
+  box-shadow: 0 3px 0 #6D4C41;
 
   &:hover {
-    background-color: #e8e8e8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #6D4C41;
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #6D4C41;
   }
 }
 
 .save-btn {
-  background-color: #3b82f6;
+  background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%);
   color: white;
+  border-color: #2E7D32;
+  box-shadow: 0 3px 0 #2E7D32;
 
   &:hover {
-    background-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #2E7D32;
+    background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #2E7D32;
   }
 }
 
 .delete-btn {
-  background-color: #ef4444;
+  background: linear-gradient(135deg, #EF9A9A 0%, #EF5350 100%);
   color: white;
+  border-color: #C62828;
+  box-shadow: 0 3px 0 #C62828;
   margin-right: auto;
 
   &:hover {
-    background-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #C62828;
+    background: linear-gradient(135deg, #E57373 0%, #F44336 100%);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #C62828;
   }
 }
 </style>

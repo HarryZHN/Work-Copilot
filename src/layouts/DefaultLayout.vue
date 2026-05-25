@@ -61,7 +61,7 @@ const handleExportData = async () => {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
     
-    alert('数据导出成功！')
+    alert('数据导出成功！✨')
   } catch (error) {
     console.error('导出失败:', error)
     alert('导出失败，请查看控制台')
@@ -107,7 +107,7 @@ const handleFileChange = async (event: Event) => {
       await db.tasks.bulkPut(importData.tasks)
     }
     
-    alert(`导入成功！\n备忘录: ${importData.memos.length} 条\n排期任务: ${importData.tasks.length} 条`)
+    alert(`导入成功！🎉\n备忘录: ${importData.memos.length} 条\n排期任务: ${importData.tasks.length} 条`)
     
     // 刷新页面以更新数据
     window.location.reload()
@@ -123,6 +123,15 @@ const handleFileChange = async (event: Event) => {
 
 <template>
   <div class="layout-container">
+    <!-- 可爱的背景装饰 -->
+    <div class="bg-decoration">
+      <span class="deco deco-1">🌻</span>
+      <span class="deco deco-2">🌷</span>
+      <span class="deco deco-3">🍎</span>
+      <span class="deco deco-4">🎀</span>
+      <span class="deco deco-5">⭐</span>
+    </div>
+    
     <Sidebar 
       :nav-items="navItems" 
       @nav-click="handleNavClick"
@@ -145,29 +154,46 @@ const handleFileChange = async (event: Event) => {
     <div v-if="showHelpModal" class="modal-overlay" @click="closeHelpModal">
       <div class="help-modal" @click.stop>
         <div class="help-modal-header">
+          <span class="header-decoration">🌺</span>
           <h2>👋 欢迎使用 Work Copilot</h2>
+          <span class="header-decoration">🌸</span>
           <button class="close-btn" @click="closeHelpModal">×</button>
         </div>
         <div class="help-modal-body">
           <div class="help-section">
-            <h3>🛡️ 数据安全</h3>
-            <p>所有数据都存储在浏览器的本地数据库（IndexedDB）中，<strong>不会上传到任何服务器</strong>，请放心使用！</p>
+            <div class="section-icon">🛡️</div>
+            <div class="section-content">
+              <h3>数据安全</h3>
+              <p>所有数据都存储在浏览器的本地数据库（IndexedDB）中，<strong>不会上传到任何服务器</strong>，请放心使用！</p>
+            </div>
           </div>
           <div class="help-section">
-            <h3>📅 排期管理</h3>
-            <p>在排期表中，你可以创建、编辑和删除任务，支持跨天任务展示。</p>
+            <div class="section-icon">📅</div>
+            <div class="section-content">
+              <h3>排期管理</h3>
+              <p>在排期表中，你可以创建、编辑和删除任务，支持跨天任务展示。</p>
+            </div>
           </div>
           <div class="help-section">
-            <h3>📝 备忘录</h3>
-            <p>快速记录重要事项，支持搜索功能。</p>
+            <div class="section-icon">📝</div>
+            <div class="section-content">
+              <h3>备忘录</h3>
+              <p>快速记录重要事项，支持搜索功能。</p>
+            </div>
           </div>
           <div class="help-section">
-            <h3>💾 数据备份</h3>
-            <p>使用侧边栏底部的导出/导入功能，可以备份和恢复你的数据。</p>
+            <div class="section-icon">💾</div>
+            <div class="section-content">
+              <h3>数据备份</h3>
+              <p>使用侧边栏底部的导出/导入功能，可以备份和恢复你的数据。</p>
+            </div>
           </div>
         </div>
         <div class="help-modal-footer">
-          <button class="confirm-btn" @click="closeHelpModal">我知道了</button>
+          <button class="confirm-btn" @click="closeHelpModal">
+            <span class="btn-icon">✓</span>
+            我知道了
+          </button>
         </div>
       </div>
     </div>
@@ -179,13 +205,64 @@ const handleFileChange = async (event: Event) => {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  position: relative;
+}
+
+/* 可爱的背景装饰 */
+.bg-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  
+  .deco {
+    position: absolute;
+    font-size: 40px;
+    opacity: 0.15;
+    animation: float 6s ease-in-out infinite;
+    
+    &.deco-1 {
+      top: 10%;
+      right: 5%;
+      animation-delay: 0s;
+    }
+    
+    &.deco-2 {
+      top: 30%;
+      right: 15%;
+      animation-delay: 1s;
+    }
+    
+    &.deco-3 {
+      top: 60%;
+      right: 8%;
+      animation-delay: 2s;
+    }
+    
+    &.deco-4 {
+      top: 80%;
+      right: 20%;
+      animation-delay: 3s;
+    }
+    
+    &.deco-5 {
+      top: 45%;
+      right: 25%;
+      animation-delay: 4s;
+    }
+  }
 }
 
 .main-content {
   flex: 1;
-  margin-left: 200px;
-  background-color: #f5f5f5;
+  margin-left: 220px;
   overflow: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .modal-overlay {
@@ -194,112 +271,169 @@ const handleFileChange = async (event: Event) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(93, 64, 55, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .help-modal {
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(145deg, #FFFFFF 0%, #FFFDE7 100%);
+  border-radius: 24px;
   width: 90%;
-  max-width: 500px;
+  max-width: 520px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 5px solid #8D6E63;
+  box-shadow: 0 8px 0 #6D4C41, 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
 .help-modal-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #eee;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  gap: 12px;
+  padding: 22px 20px;
+  border-bottom: 4px dashed #A1887F;
+  background: linear-gradient(135deg, #FFB74D 0%, #FF8A65 100%);
   color: white;
+  position: relative;
+  
+  .header-decoration {
+    font-size: 24px;
+  }
   
   h2 {
     margin: 0;
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 700;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
   }
 }
 
 .close-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: rgba(255, 255, 255, 0.2);
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border: 3px solid white;
+  background: rgba(255, 255, 255, 0.3);
   color: white;
-  font-size: 24px;
+  font-size: 26px;
   cursor: pointer;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  font-weight: bold;
+  line-height: 1;
   
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: white;
+    color: #FF8A65;
+    transform: translateY(-50%) scale(1.1);
   }
 }
 
 .help-modal-body {
-  padding: 20px;
-  max-height: 60vh;
+  padding: 24px 20px;
+  max-height: 55vh;
   overflow-y: auto;
 }
 
 .help-section {
-  margin-bottom: 20px;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 22px;
+  background: #FFF8E1;
+  padding: 16px;
+  border-radius: 16px;
+  border: 2px solid #FFE082;
   
   &:last-child {
     margin-bottom: 0;
   }
   
-  h3 {
-    font-size: 16px;
-    color: #2c3e50;
-    margin: 0 0 10px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .section-icon {
+    font-size: 32px;
+    flex-shrink: 0;
   }
   
-  p {
-    font-size: 14px;
-    color: #666;
-    line-height: 1.6;
-    margin: 0;
+  .section-content {
+    flex: 1;
+    
+    h3 {
+      font-size: 17px;
+      color: #5D4037;
+      margin: 0 0 8px 0;
+      font-weight: 700;
+    }
+    
+    p {
+      font-size: 14px;
+      color: #795548;
+      line-height: 1.7;
+      margin: 0;
+    }
   }
 }
 
 .help-modal-footer {
-  padding: 15px 20px;
-  border-top: 1px solid #eee;
+  padding: 18px 20px;
+  border-top: 4px dashed #A1887F;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 235, 59, 0.2) 100%);
 }
 
 .confirm-btn {
-  padding: 10px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 14px 36px;
+  background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%);
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  border: 3px solid #2E7D32;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 4px 0 #2E7D32;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #2E7D32;
+    background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
   }
   
   &:active {
-    transform: translateY(0);
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #2E7D32;
   }
+  
+  .btn-icon {
+    font-size: 18px;
+  }
+}
+
+/* 自定义滚动条 */
+.help-modal-body::-webkit-scrollbar {
+  width: 10px;
+}
+
+.help-modal-body::-webkit-scrollbar-track {
+  background: rgba(255, 248, 225, 0.5);
+  border-radius: 5px;
+}
+
+.help-modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FFB74D 0%, #FF8A65 100%);
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 </style>

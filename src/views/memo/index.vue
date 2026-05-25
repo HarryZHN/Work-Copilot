@@ -47,11 +47,10 @@ const openCreate = () => {
 
 const saveMemo = async () => {
   if (!newMemo.value.title.trim()) {
-    alert('请输入标题')
+    alert('请输入标题哦~ 📝')
     return
   }
   
-  // 创建一个纯对象，确保不包含 Vue 响应式属性
   const memo = {
     id: editingMemo.value?.id || Date.now().toString(),
     title: newMemo.value.title.trim(),
@@ -64,8 +63,10 @@ const saveMemo = async () => {
 }
 
 const deleteMemo = async (id: string) => {
-  await db.memos.delete(id)
-  await loadMemos()
+  if (confirm('确定要删除这个备忘录吗？ 🥺')) {
+    await db.memos.delete(id)
+    await loadMemos()
+  }
 }
 
 const closeModal = () => {
@@ -79,15 +80,19 @@ onMounted(loadMemos)
 <template>
   <div class="memo-container">
     <div class="page-header">
-      <button class="create-btn" @click="openCreate">新建备忘录</button>
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="搜索标题或内容..."
-        class="search-input"
-      />
+      <h1 class="page-title">📔 我的备忘录 ✨</h1>
+      <div class="header-actions">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="🔍 搜索备忘录..."
+          class="search-input"
+        />
+        <button class="create-btn" @click="openCreate">
+          <span class="btn-emoji">➕</span> 新建备忘录
+        </button>
+      </div>
     </div>
-    
     
     <div class="memo-list">
       <div
@@ -96,47 +101,65 @@ onMounted(loadMemos)
         class="memo-card"
         @click="openDetail(memo)"
       >
-        <h3 class="memo-title">{{ memo.title }}</h3>
-        <button class="delete-btn" @click.stop="deleteMemo(memo.id)">删除</button>
+        <div class="memo-content">
+          <h3 class="memo-title">
+            <span class="title-emoji">📝</span>
+            {{ memo.title }}
+          </h3>
+          <p class="memo-preview" v-if="memo.content">{{ memo.content.slice(0, 80) }}{{ memo.content.length > 80 ? '...' : '' }}</p>
+        </div>
+        <button class="delete-btn" @click.stop="deleteMemo(memo.id)">
+          <span>🗑️</span>
+        </button>
       </div>
       
       <div v-if="filteredMemos.length === 0" class="empty-state">
-        <p>{{ searchQuery ? '未找到匹配的备忘录' : '暂无备忘录，点击上方按钮添加' }}</p>
+        <div class="empty-emoji">📭</div>
+        <p>{{ searchQuery ? '未找到匹配的备忘录呢~ 换个关键词试试？' : '暂无备忘录，点击上方按钮添加吧！' }}</p>
       </div>
     </div>
 
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h2>{{ editingMemo ? '编辑备忘录' : '新建备忘录' }}</h2>
-          <button class="close-btn" @click="closeModal">×</button>
+          <h2>
+            <span class="header-emoji">{{ editingMemo ? '✏️' : '📝' }}</span>
+            {{ editingMemo ? '编辑备忘录' : '新建备忘录' }}
+          </h2>
+          <button class="close-btn" @click="closeModal">✖️</button>
         </div>
         
         <div class="modal-body">
           <div class="form-group">
-            <label>标题 *</label>
+            <label>📌 标题 *</label>
             <input
               v-model="newMemo.title"
               type="text"
-              placeholder="请输入标题"
+              placeholder="给备忘录起个名字吧~"
               class="form-input"
             />
           </div>
           
           <div class="form-group">
-            <label>内容</label>
+            <label>💭 内容</label>
             <textarea
               v-model="newMemo.content"
-              placeholder="请输入内容（可选）"
+              placeholder="记录你的想法... (๑•̀ㅂ•́)و✧"
               class="form-textarea"
             ></textarea>
           </div>
         </div>
         
         <div class="modal-footer">
-          <button v-if="editingMemo" class="delete-btn" @click="deleteMemo(editingMemo.id); closeModal()">删除</button>
-          <button class="cancel-btn" @click="closeModal">取消</button>
-          <button class="save-btn" @click="saveMemo">保存</button>
+          <button v-if="editingMemo" class="delete-modal-btn" @click="deleteMemo(editingMemo.id); closeModal()">
+            <span>🗑️</span> 删除
+          </button>
+          <button class="cancel-btn" @click="closeModal">
+            <span>❌</span> 取消
+          </button>
+          <button class="save-btn" @click="saveMemo">
+            <span>💾</span> 保存
+          </button>
         </div>
       </div>
     </div>
@@ -147,107 +170,169 @@ onMounted(loadMemos)
 .memo-container {
   padding: 24px;
   min-height: 100%;
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 50%, #F1F8E9 100%);
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.page-header h1 {
-  font-size: 24px;
-  color: #2c3e50;
+.page-title {
+  font-size: 28px;
+  color: #5D4037;
+  margin: 0;
+  text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+  animation: float 3s ease-in-out infinite;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .create-btn {
-  padding: 8px 16px;
-  background-color: #3498db;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  box-shadow: 0 4px 0px #F57C00, 0 6px 12px rgba(255, 152, 0, 0.3);
+  transition: all 0.2s;
 
   &:hover {
-    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0px #F57C00, 0 8px 16px rgba(255, 152, 0, 0.4);
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0px #F57C00, 0 3px 8px rgba(255, 152, 0, 0.3);
   }
 }
 
-.search-bar {
-  margin-bottom: 20px;
+.btn-emoji {
+  margin-right: 6px;
 }
 
 .search-input {
-  width: 100%;
-  max-width: 400px;
-  padding: 10px 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  width: 280px;
+  padding: 12px 18px;
+  border: 3px dashed #FFCC80;
+  border-radius: 20px;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s;
 
   &:focus {
-    border-color: #3498db;
+    border-color: #FF8A65;
+    box-shadow: 0 0 0 4px rgba(255, 138, 101, 0.2);
   }
 }
 
 .memo-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
 }
 
 .memo-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: white;
-  padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(145deg, #FFFFFF 0%, #FFF8E1 100%);
+  padding: 20px;
+  border-radius: 20px;
+  border: 3px dashed #FFCC80;
+  box-shadow: 0 6px 0px #FFE0B2, 0 8px 20px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px) rotate(-1deg);
+    box-shadow: 0 10px 0px #FFE0B2, 0 14px 24px rgba(0, 0, 0, 0.15);
   }
 }
 
-.memo-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #2c3e50;
-  margin: 0;
+.memo-content {
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.memo-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #5D4037;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-emoji {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.memo-preview {
+  font-size: 14px;
+  color: #8D6E63;
+  margin: 0;
+  line-height: 1.6;
 }
 
 .delete-btn {
-  padding: 4px 10px;
-  background-color: #e74c3c;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #EF9A9A 0%, #E57373 100%);
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
-  margin-left: 12px;
+  box-shadow: 0 3px 0px #C62828;
+  transition: all 0.2s;
+  align-self: flex-end;
 
   &:hover {
-    background-color: #c0392b;
+    transform: scale(1.05);
+    box-shadow: 0 4px 0px #C62828;
+  }
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 0px #C62828;
   }
 }
 
 .empty-state {
+  grid-column: 1 / -1;
   text-align: center;
-  padding: 60px 20px;
-  color: #999;
+  padding: 80px 20px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  border: 3px dashed #C8E6C9;
+}
+
+.empty-emoji {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: #795548;
+  margin: 0;
 }
 
 .modal-overlay {
@@ -256,124 +341,191 @@ onMounted(loadMemos)
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(93, 64, 55, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(145deg, #FFFDF7 0%, #FFF8E1 100%);
+  border-radius: 24px;
   width: 90%;
-  max-width: 500px;
+  max-width: 520px;
   overflow: hidden;
+  border: 4px solid #FFCC80;
+  box-shadow: 0 12px 0px #FFE0B2, 0 16px 40px rgba(0, 0, 0, 0.2);
+  animation: bounce-soft 0.5s ease-out;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #FFE082 0%, #FFCC80 100%);
+  border-bottom: 3px dashed #FFB74D;
 }
 
 .modal-header h2 {
-  font-size: 18px;
-  color: #2c3e50;
+  font-size: 20px;
+  color: #5D4037;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .close-btn {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border: none;
-  background: none;
-  font-size: 24px;
-  color: #999;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  font-size: 18px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
 
   &:hover {
-    color: #666;
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
   }
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 24px;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #2c3e50;
-  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #5D4037;
+  margin-bottom: 10px;
 }
 
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 14px 18px;
+  border: 3px dashed #C8E6C9;
+  border-radius: 16px;
+  font-size: 15px;
   outline: none;
-  transition: border-color 0.2s;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s;
+  font-family: inherit;
 
   &:focus {
-    border-color: #3498db;
+    border-color: #A5D6A7;
+    box-shadow: 0 0 0 4px rgba(165, 214, 167, 0.3);
   }
 }
 
 .form-textarea {
-  min-height: 150px;
+  min-height: 180px;
   resize: vertical;
+  line-height: 1.6;
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 16px 20px;
-  border-top: 1px solid #eee;
+  padding: 20px 24px;
+  border-top: 3px dashed #FFCC80;
 }
 
 .modal-footer button {
-  padding: 8px 16px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .cancel-btn {
-  background-color: #f5f5f5;
-  color: #333;
+  background: linear-gradient(135deg, #EEEEEE 0%, #E0E0E0 100%);
+  color: #616161;
+  box-shadow: 0 4px 0px #BDBDBD;
 
   &:hover {
-    background-color: #e8e8e8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0px #BDBDBD;
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0px #BDBDBD;
   }
 }
 
 .save-btn {
-  background-color: #3498db;
+  background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
   color: white;
+  box-shadow: 0 4px 0px #388E3C;
 
   &:hover {
-    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0px #388E3C;
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0px #388E3C;
   }
 }
 
-.modal-footer .delete-btn {
-  margin-left: 0;
+.delete-modal-btn {
+  background: linear-gradient(135deg, #EF9A9A 0%, #E57373 100%);
+  color: white;
+  box-shadow: 0 4px 0px #C62828;
+  margin-right: auto;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0px #C62828;
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0px #C62828;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+@keyframes bounce-soft {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 </style>
