@@ -152,18 +152,7 @@ function isSameDay(date1: Date, date2: Date): boolean {
   return formatDate(date1) === formatDate(date2);
 }
 
-function formatTaskDateRange(startDate: string, endDate: string): string {
-  const start = parseDate(startDate);
-  const end = parseDate(endDate);
-  
-  const startStr = `${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日`;
-  const endStr = `${end.getFullYear()}年${end.getMonth() + 1}月${end.getDate()}日`;
-  
-  if (startDate === endDate) {
-    return startStr;
-  }
-  return `${startStr} - ${endStr}`;
-}
+
 
 function scrollToToday() {
   nextTick(() => {
@@ -333,7 +322,7 @@ onMounted(() => {
                       }"
                       :class="{ 'task-completed': task.completed }"
                       @click.stop="openEditModal(task.id)"
-                      :title="formatTaskDateRange(task.startDate, task.endDate)"
+                      :title="task.title"
                     >
                       <input
                         type="checkbox"
@@ -352,7 +341,7 @@ onMounted(() => {
                       }"
                       :class="{ 'task-completed': task.completed }"
                       @click.stop="openEditModal(task.id)"
-                      :title="formatTaskDateRange(task.startDate, task.endDate)"
+                      :title="task.title"
                     >
                       <input
                         type="checkbox"
@@ -370,7 +359,7 @@ onMounted(() => {
                         gridRow: getTaskRow(task.id)
                       }"
                       @click.stop="openEditModal(task.id)"
-                      :title="formatTaskDateRange(task.startDate, task.endDate)"
+                      :title="task.title"
                     ></div>
                     <div
                       v-else-if="task.endDate === day.date"
@@ -381,7 +370,7 @@ onMounted(() => {
                       }"
                       :class="{ 'task-completed': task.completed }"
                       @click.stop="openEditModal(task.id)"
-                      :title="formatTaskDateRange(task.startDate, task.endDate)"
+                      :title="task.title"
                     ></div>
                   </template>
                 </div>
