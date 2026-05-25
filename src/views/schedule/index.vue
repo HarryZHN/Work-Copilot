@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { db, type Task } from '@/db';
 import { formatDate, getDaysInMonth, getFirstDayOfMonth, addMonths, parseDate, isDateBetween } from '@/utils/date';
 import { getTaskColor, getTaskTextColor } from '@/utils/color';
@@ -13,6 +13,7 @@ const tasks = ref<Task[]>([]);
 const showModal = ref(false);
 const editingTask = ref<Task | null>(null);
 const calendarWrapper = ref<HTMLElement | null>(null);
+const calendarBodyRef = ref<HTMLElement | null>(null);
 
 const newTask = ref({
   title: '',
@@ -151,6 +152,30 @@ function isSameDay(date1: Date, date2: Date): boolean {
   return formatDate(date1) === formatDate(date2);
 }
 
+function formatTaskDateRange(startDate: string, endDate: string): string {
+  const start = parseDate(startDate);
+  const end = parseDate(endDate);
+  
+  const startStr = `${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日`;
+  const endStr = `${end.getFullYear()}年${end.getMonth() + 1}月${end.getDate()}日`;
+  
+  if (startDate === endDate) {
+    return startStr;
+  }
+  return `${startStr} - ${endStr}`;
+}
+
+function scrollToToday() {
+  nextTick(() => {
+    if (!calendarBodyRef.value) return;
+    
+    const todayCell = calendarBodyRef.value.querySelector('.today');
+    if (todayCell) {
+      todayCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+
 function prevMonth() {
   currentDate.value = addMonths(currentDate.value, -1);
 }
@@ -161,6 +186,7 @@ function nextMonth() {
 
 function goToToday() {
   currentDate.value = new Date();
+  scrollToToday();
 }
 
 async function loadTasks() {
@@ -240,6 +266,7 @@ function closeModal() {
 
 onMounted(() => {
   loadTasks();
+  scrollToToday();
 });
 </script>
 
@@ -279,7 +306,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="calendar-body">
+        <div class="calendar-body" ref="calendarBodyRef">
           <div class="calendar-grid">
             <div
               v-for="(day, dayIndex) in calendarDays"
@@ -306,6 +333,7 @@ onMounted(() => {
                       }"
                       :class="{ 'task-completed': task.completed }"
                       @click.stop="openEditModal(task.id)"
+                      :title="formatTaskDateRange(task.startDate, task.endDate)"
                     >
                       <input
                         type="checkbox"
@@ -324,6 +352,7 @@ onMounted(() => {
                       }"
                       :class="{ 'task-completed': task.completed }"
                       @click.stop="openEditModal(task.id)"
+                      :title="formatTaskDateRange(task.startDate, task.endDate)"
                     >
                       <input
                         type="checkbox"
@@ -341,6 +370,7 @@ onMounted(() => {
                         gridRow: getTaskRow(task.id)
                       }"
                       @click.stop="openEditModal(task.id)"
+                      :title="formatTaskDateRange(task.startDate, task.endDate)"
                     ></div>
                     <div
                       v-else-if="task.endDate === day.date"
@@ -351,6 +381,7 @@ onMounted(() => {
                       }"
                       :class="{ 'task-completed': task.completed }"
                       @click.stop="openEditModal(task.id)"
+                      :title="formatTaskDateRange(task.startDate, task.endDate)"
                     ></div>
                   </template>
                 </div>
