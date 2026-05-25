@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { db, type Task } from '@/db';
 import { formatDate, getDaysInMonth, getFirstDayOfMonth, addMonths, parseDate, isDateBetween } from '@/utils/date';
 import { getTaskColor, getTaskTextColor } from '@/utils/color';
@@ -13,8 +13,6 @@ const tasks = ref<Task[]>([]);
 const showModal = ref(false);
 const editingTask = ref<Task | null>(null);
 const calendarWrapper = ref<HTMLElement | null>(null);
-const cellWidth = ref(100);
-const cellHeight = ref(220);
 
 const newTask = ref({
   title: '',

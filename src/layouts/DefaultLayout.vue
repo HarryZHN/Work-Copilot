@@ -40,12 +40,14 @@ const handleExportData = async () => {
   try {
     const memos = await db.memos.toArray()
     const tasks = await db.tasks.toArray()
+    const todayTasks = await db.todayTasks.toArray()
     
     const exportData = {
-      version: '1.0',
+      version: '1.1',
       exportDate: new Date().toISOString(),
       memos,
-      tasks
+      tasks,
+      todayTasks
     }
     
     const dataStr = JSON.stringify(exportData, null, 2)
@@ -61,7 +63,7 @@ const handleExportData = async () => {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
     
-    alert('数据导出成功！✨')
+    alert(`数据导出成功！✨\n备忘录: ${memos.length} 条\n排期任务: ${tasks.length} 条\n今日待办: ${todayTasks.length} 条`)
   } catch (error) {
     console.error('导出失败:', error)
     alert('导出失败，请查看控制台')
@@ -98,6 +100,7 @@ const handleFileChange = async (event: Event) => {
     // 清空现有数据
     await db.memos.clear()
     await db.tasks.clear()
+    await db.todayTasks.clear()
     
     // 导入新数据
     if (importData.memos.length > 0) {
@@ -106,8 +109,12 @@ const handleFileChange = async (event: Event) => {
     if (importData.tasks.length > 0) {
       await db.tasks.bulkPut(importData.tasks)
     }
+    if (importData.todayTasks && importData.todayTasks.length > 0) {
+      await db.todayTasks.bulkPut(importData.todayTasks)
+    }
     
-    alert(`导入成功！🎉\n备忘录: ${importData.memos.length} 条\n排期任务: ${importData.tasks.length} 条`)
+    const todayTasksCount = importData.todayTasks ? importData.todayTasks.length : 0
+    alert(`导入成功！🎉\n备忘录: ${importData.memos.length} 条\n排期任务: ${importData.tasks.length} 条\n今日待办: ${todayTasksCount} 条`)
     
     // 刷新页面以更新数据
     window.location.reload()

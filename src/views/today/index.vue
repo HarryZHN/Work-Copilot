@@ -18,7 +18,6 @@ const newTask = ref({
 })
 
 const WEEK_DAYS = ['日', '一', '二', '三', '四', '五', '六']
-const WEEK_EMOJIS = ['☀️', '🌸', '🌿', '🌺', '🍀', '🌻', '🌙']
 
 const displayDates = computed(() => {
   if (viewMode.value === 'day') {
@@ -34,17 +33,6 @@ const displayDates = computed(() => {
       dates.push(formatDate(d))
     }
     return dates
-  }
-})
-
-const displayTitle = computed(() => {
-  if (viewMode.value === 'day') {
-    const d = currentDate.value
-    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 周${WEEK_DAYS[d.getDay()]}`
-  } else {
-    const start = parseDate(displayDates.value[0])
-    const end = parseDate(displayDates.value[6])
-    return `${start.getMonth() + 1}月${start.getDate()}日 - ${end.getMonth() + 1}月${end.getDate()}日`
   }
 })
 
@@ -152,10 +140,6 @@ const isToday = (dateStr: string) => {
 
 const getDayOfWeek = (dateStr: string) => {
   return WEEK_DAYS[parseDate(dateStr).getDay()]
-}
-
-const getDayEmoji = (dateStr: string) => {
-  return WEEK_EMOJIS[parseDate(dateStr).getDay()]
 }
 
 const getDateLabel = (dateStr: string) => {
