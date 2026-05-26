@@ -21,14 +21,10 @@ const openGitHub = () => {
 
 <template>
   <aside class="sidebar">
-    <!-- 可爱的顶部装饰 -->
-    <div class="decoration-leaf leaf-1">🌿</div>
-    <div class="decoration-leaf leaf-2">🍀</div>
-    <div class="decoration-leaf leaf-3">🌸</div>
     
     <div class="sidebar-header">
       <div class="logo">
-        <span class="logo-icon">🏠</span>
+        <span class="logo-icon"></span>
         <span class="logo-text">Work Copilot</span>
       </div>
       <div class="subtitle">让每一天都充满元气！</div>
@@ -158,7 +154,12 @@ const openGitHub = () => {
 
 .logo-icon {
   font-size: 32px;
-  animation: wiggle 2s ease-in-out infinite;
+  height: 32px;
+  width: 32px;
+  background-image: url('/src/assets/logo.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .logo-text {

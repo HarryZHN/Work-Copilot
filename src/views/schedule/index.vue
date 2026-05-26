@@ -5,7 +5,6 @@ import { formatDate, getDaysInMonth, getFirstDayOfMonth, addMonths, parseDate, i
 import { getTaskColor, getTaskTextColor } from '@/utils/color';
 
 const WEEK_DAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-const WEEK_EMOJIS = ['☀️', '🌸', '🌿', '🌺', '🍀', '🌻', '🌙'];
 const MAX_ROWS = 4;
 
 const currentDate = ref(new Date());
@@ -290,7 +289,6 @@ onMounted(() => {
             class="week-day"
             style="width: 14%"
           >
-            <span class="week-emoji">{{ WEEK_EMOJIS[index] }}</span>
             {{ day }}
           </div>
         </div>
